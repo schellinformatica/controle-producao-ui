@@ -4,12 +4,19 @@ import { Link, useNavigate } from "react-router-dom";
 import Appointment from "../../components/appointment/appointment.jsx";
 import { useEffect, useState } from "react";
 import api from "../../constants/api.js";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { registerLocale } from "react-datepicker";
+import ptBR from "date-fns/locale/pt-BR";
+import * as XLSX from "xlsx"; // Importando a biblioteca xlsx
+
+registerLocale("pt-BR", ptBR);
 
 function Appointments() {
     const navigate = useNavigate();
     const [appointments, setAppointments] = useState([]);
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [action, setAction] = useState("");
@@ -19,7 +26,7 @@ function Appointments() {
         try {
             let url = "/production";
             if (startDate || endDate) {
-                url += `?startDate=${startDate}&endDate=${endDate}`;
+                url += `?startDate=${startDate ? startDate.toISOString().split('T')[0] : ''}&endDate=${endDate ? endDate.toISOString().split('T')[0] : ''}`;
             }
             const response = await api.get(url);
             if (response.data) {
@@ -69,6 +76,19 @@ function Appointments() {
         }
     };
 
+    function exportToExcel() {
+        const ws = XLSX.utils.json_to_sheet(appointments.map(mq => ({
+            Máquina: mq.maquina.nome,
+            Ações: "Editar / Deletar"
+        })));
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Empacotamento");
+
+        // Salva o arquivo Excel
+        XLSX.writeFile(wb, "Empacotamento.xlsx");
+    }
+
     return (
         <div className="container-fluid mt-page">
             <NavBar />
@@ -80,29 +100,40 @@ function Appointments() {
                             <li className="breadcrumb-item active" aria-current="page">Produção</li>
                         </ol>
                     </nav>
-                    <div>
-                        <Link to="/appointments/add" className="btn btn-primary mt-2">
+
+                    <div className="d-flex justify-content-between align-items-center mt-2">
+                        <Link to="/appointments/add" className="btn btn-primary btn-clean mt-2">
                             Nova produção
                         </Link>
+                        <button className="btn btn-outline-card btn-clean mt-2 ms-3" onClick={exportToExcel}>
+                            Exportar Excel
+                        </button>
+                        
+                        <div className="d-flex align-items-center ms-auto">
+                            <label className="me-2">Data Início</label>
+                            <DatePicker
+                                selected={startDate}
+                                onChange={(date) => setStartDate(date)}
+                                className="form-control input-clean"
+                                dateFormat="dd/MM/yyyy"
+                                locale="pt-BR"
+                                placeholderText="Selecione a data"
+                            />
+                            <label className="ms-3 me-2">Data Fim</label>
+                            <DatePicker
+                                selected={endDate}
+                                onChange={(date) => setEndDate(date)}
+                                className="form-control input-clean"
+                                dateFormat="dd/MM/yyyy"
+                                locale="pt-BR"
+                                placeholderText="Selecione a data"
+                            />
+                            <button className="btn btn-outline-card btn-clean ms-3" onClick={handleFilterChange}>
+                                Aplicar Filtro
+                            </button>
+                        </div>
                     </div>
-                    
-                    <div className="mt-3">
-                        <label htmlFor="startDate">Data Início</label>
-                        <input
-                            type="date"
-                            id="startDate"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                        />
-                        <label htmlFor="endDate" className="ml-3">Data Fim</label>
-                        <input
-                            type="date"
-                            id="endDate"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                        />
-                        <button className="btn btn-secondary ml-3" onClick={handleFilterChange}>Aplicar Filtro</button>
-                    </div>
+
 
                     <div>
                         <table className="table table-hover mt-4">
@@ -120,23 +151,21 @@ function Appointments() {
                             </thead>
                             <tbody>
                                 {
-                                    appointments.map((ap) => {
-                                        return (
-                                            <Appointment key={ap.id}
-                                                id={ap.id}
-                                                maquina={ap.maquina.nome}
-                                                hora={ap.hora}
-                                                lote={ap.lote}
-                                                lote_interno={ap.lote_interno}
-                                                marca={ap.marca}
-                                                quantidade={ap.quantidade}
-                                                verificado={ap.verificado}
-                                                ClickDelete={() => console.log("deletar: " + ap.id)}
-                                                ClickParar={handleParar}
-                                                ClickRetomar={handleRetomar}
-                                            />
-                                        );
-                                    })
+                                    appointments.map((ap) => (
+                                        <Appointment key={ap.id}
+                                            id={ap.id}
+                                            maquina={ap.maquina.nome}
+                                            hora={ap.hora}
+                                            lote={ap.lote}
+                                            lote_interno={ap.lote_interno}
+                                            marca={ap.marca}
+                                            quantidade={ap.quantidade}
+                                            verificado={ap.verificado}
+                                            ClickDelete={() => console.log("deletar: " + ap.id)}
+                                            ClickParar={handleParar}
+                                            ClickRetomar={handleRetomar}
+                                        />
+                                    ))
                                 }
                             </tbody>
                         </table>
@@ -182,6 +211,7 @@ function Appointments() {
                     </div>
                 </div>
             )}
+            
         </div>
     );
 }

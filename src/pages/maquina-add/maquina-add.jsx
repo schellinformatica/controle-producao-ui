@@ -86,7 +86,7 @@ function MaquinaAdd() {
                                     setNome(e.target.value);
                                     if (nomeError) setNomeError("");
                                 }}
-                                className={`form-control ${nomeError ? 'is-invalid' : ''}`}
+                                className={`form-control input-clean ${nomeError ? 'is-invalid' : ''}`}
                                 id="nome"
                                 name="nome"
                                 placeholder=""
@@ -95,7 +95,7 @@ function MaquinaAdd() {
 
                         </div>
 
-                        <button onClick={SaveMaquina} className="btn btn-primary" type="button">
+                        <button onClick={SaveMaquina} className="btn btn-primary btn-clean" type="button">
                             Salvar
                         </button>
                     </div>

@@ -67,12 +67,12 @@ function Maquinas() {
                     </nav>
 
                     <div>
-                        <Link to="/maquinas/add" className="btn btn-primary mt-2">
+                        <Link to="/maquinas/add" className="btn btn-primary btn-clean mt-2">
                             Nova máquina
                         </Link>
 
                         {/* Botões de exportação */}
-                        <button onClick={exportToExcel} className="btn btn-default mt-2 ml-2">
+                        <button onClick={exportToExcel} className="btn btn-outline-card btn-clean mt-2 ms-3">
                             Exportar Excel
                         </button>
                     </div>

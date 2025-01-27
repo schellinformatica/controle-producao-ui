@@ -237,7 +237,7 @@ function AppointmentAdd() {
                                     setLote(e.target.value);
                                     if (loteError) setLoteError("");
                                 }}
-                                className="form-control" 
+                                className="form-control input-clean" 
                                 name="lote" 
                                 id="lote" 
                                 required 
