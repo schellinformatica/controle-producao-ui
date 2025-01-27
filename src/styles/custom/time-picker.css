@@ -1,0 +1,22 @@
+/* Garante que o TimePicker tenha a aparência de um input Bootstrap */
+.bootstrap-timepicker {
+    width: 100%; /* Faz o input ocupar todo o espaço */
+    border: 1px solid #ced4da; /* Mesma borda do Bootstrap */
+    border-radius: 0.375rem; /* Arredondamento padrão */
+    padding: 0.375rem 0.75rem; /* Padding do Bootstrap */
+    font-size: 1rem; /* Tamanho de fonte igual ao input padrão */
+    height: 38px; /* Ajusta altura para se alinhar a outros inputs */
+  }
+  
+  /* Ajusta a posição do menu dropdown */
+  .react-time-picker__wrapper {
+    border: none !important; /* Remove borda extra */
+  }
+  
+  /* Se quiser deixar igual ao Bootstrap quando passa o mouse */
+  .bootstrap-timepicker:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+  

@@ -1,0 +1,17 @@
+.chart-container {
+    width: 100%;
+    height: 300px; /* Ajuste a altura conforme necessário */
+}
+
+/* Adicionar padding ao título e ao container do gráfico */
+.card-title {
+    padding-left: 15px; /* Padding à esquerda */
+    padding-top: 10px;  /* Padding no topo */
+    padding-bottom: 10px; /* Padding inferior */
+}
+
+.chart-container {
+    padding: 15px; /* Padding em todos os lados do gráfico */
+    border-radius: 5px; /* Opcional: bordas arredondadas para o gráfico */
+    background-color: #f9f9f9; /* Opcional: fundo suave no container */
+}
