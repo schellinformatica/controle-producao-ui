@@ -93,40 +93,40 @@ function Appointments() {
         <div className="container-fluid mt-page">
             <NavBar />
             <div className="content-wrapper">
-                <div className="container-custom">
+                <div className="container-custom mt-2">
                     <nav aria-label="breadcrumb">
                         <ol className="breadcrumb">
                             <li className="breadcrumb-item"><Link to="/">Dashboard</Link></li>
-                            <li className="breadcrumb-item active" aria-current="page">Produção</li>
+                            <li className="breadcrumb-item active" aria-current="page">Empacotamento</li>
                         </ol>
                     </nav>
 
                     <div className="d-flex justify-content-between align-items-center mt-2">
-                        <Link to="/appointments/add" className="btn btn-primary btn-clean mt-2">
-                            Nova produção
+                        <Link to="/appointments/add" className="btn btn-primary btn-clean mt-3">
+                            Novo empacotamento
                         </Link>
-                        <button className="btn btn-outline-card btn-clean mt-2 ms-3" onClick={exportToExcel}>
+                        <button className="btn btn-outline-card btn-clean mt-3 ms-3" onClick={exportToExcel}>
                             Exportar Excel
                         </button>
                         
-                        <div className="d-flex align-items-center ms-auto">
-                            <label className="me-2">Data Início</label>
+                        <div className="d-flex align-items-center ms-auto mt-3">
+                            <label className="me-2"></label>
                             <DatePicker
                                 selected={startDate}
                                 onChange={(date) => setStartDate(date)}
-                                className="form-control input-clean"
+                                className="form-control input-clean input-datetime-filter"
                                 dateFormat="dd/MM/yyyy"
                                 locale="pt-BR"
-                                placeholderText="Selecione a data"
+                                placeholderText="Data Início"
                             />
-                            <label className="ms-3 me-2">Data Fim</label>
+                            <label className="ms-2 me-2"></label>
                             <DatePicker
                                 selected={endDate}
                                 onChange={(date) => setEndDate(date)}
-                                className="form-control input-clean"
+                                className="form-control input-clean input-datetime-filter"
                                 dateFormat="dd/MM/yyyy"
                                 locale="pt-BR"
-                                placeholderText="Selecione a data"
+                                placeholderText="Data Fim"
                             />
                             <button className="btn btn-outline-card btn-clean ms-3" onClick={handleFilterChange}>
                                 Aplicar Filtro
@@ -135,12 +135,12 @@ function Appointments() {
                     </div>
 
 
-                    <div>
-                        <table className="table table-hover mt-4">
-                            <thead>
+                    <div style={{ marginTop: "33px" }}>
+                        <table className="table table-hover table-bordered">
+                            <thead className="table-light">
                                 <tr>
                                     <th scope="col">Máquina</th>
-                                    <th scope="col">Hora</th>
+                                    <th scope="col">Data</th>
                                     <th scope="col">Lote</th>
                                     <th scope="col">Lote Interno</th>
                                     <th scope="col">Marca</th>
@@ -211,6 +211,11 @@ function Appointments() {
                     </div>
                 </div>
             )}
+
+            {/* Rodapé com espaçamento */}
+            <footer className="mt-auto" style={{ padding: "50px 0", backgroundColor: "#f8f9fa", color: "#6c757d", textAlign: "center" }}>
+                <p>2025 Controle de Produção</p>
+            </footer>
             
         </div>
     );

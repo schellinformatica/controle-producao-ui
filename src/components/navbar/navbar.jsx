@@ -19,19 +19,21 @@ function NavBar() {
                     <Link className="nav-link active" to="/dashboard">Dashboard</Link>
                 </li>
                 <li className="nav-item">
-                    <Link className="nav-link" to="/beneficiamento">Beneficiamento</Link>
+                    <Link className="nav-link" to="/beneficiamentos">Beneficiamentos</Link>
                 </li>
                 <li className="nav-item">
-                    <Link className="nav-link" to="/appointments">Produção</Link>
+                    <Link className="nav-link" to="/appointments">Empacotamento</Link>
                 </li>
                 <li className="nav-item">
                     <Link className="nav-link" to="/maquinas">Máquinas</Link>
                 </li>
                 <li className="nav-item">
-                    <Link className="nav-link" to="/employee">Usuários</Link>
+                    <Link className="nav-link" to="/usuarios">Usuários</Link>
                 </li>
 
                 {/* Adicionando o dropdown de Relatórios */}
+                
+                { /*
                 <li className="nav-item dropdown">
                     <Link className="nav-link dropdown-toggle" to="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Relatórios
@@ -39,7 +41,7 @@ function NavBar() {
                     <ul className="dropdown-menu" aria-labelledby="reportsDropdown">
                         <li><Link className="dropdown-item" to="/relatorio1">Eficiência de Produção</Link></li>
                     </ul>
-                </li>
+                </li> */}
 
                 {/*<li className="nav-item">
                     <Link className="nav-link active" to="/employee">Usuários</Link>

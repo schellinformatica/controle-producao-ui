@@ -1,70 +1,42 @@
-import "./maquinas.css";
+import "./beneficiamentos.css";
 import NavBar from "../../components/navbar/navbar.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../constants/api.js";
-import Maquina from "../../components/maquina/maquina.jsx";
-import { jsPDF } from "jspdf";
-import * as XLSX from "xlsx"; // Importando a biblioteca xlsx
+import Beneficiamento from "../../components/beneficiamento/beneficiamento.jsx";
 
-function Maquinas() {
+function Beneficiamentos() {
     const navigate = useNavigate();
-    const [maquina, setMaquinas] = useState([]);
+    const [beneficiamento, setBeneficiamentos] = useState([]);
 
     function ClickEdit(id) {
         navigate("/maquinas/edit/" + id);
     }
 
-    async function ClickDelete(id) {
-        try {
-            const response = await api.delete("/maquina/" + id);
-            if (response.data) {
-                LoadMaquinas();
-            }
-        } catch (error) {
-            if (error.response?.data.error) {
-                if (error.response.status === 401) return navigate("/");
-                alert(error.response?.data.error);
-            } else {
-                alert("Erro ao carregar máquinas.");
-            }
-        }
+    function ClickDelete(idConsulta) {
+        console.log("deletar: " + idConsulta);
     }
 
-    async function LoadMaquinas() {
+    async function LoadBeneficiamento() {
         try {
-            const response = await api.get("/maquina");
+            const response = await api.get("/beneficiamento");
 
             if (response.data) {
-                setMaquinas(response.data);
+                setBeneficiamentos(response.data);
             }
         } catch (error) {
             if (error.response?.data.error) {
                 if (error.response.status === 401) return navigate("/");
                 alert(error.response?.data.error);
             } else {
-                alert("Erro ao carregar máquinas.");
+                alert("Erro ao carregar beneficiamentos.");
             }
         }
     }
 
     useEffect(() => {
-        LoadMaquinas();
+        LoadBeneficiamento();
     }, []);
-
-    // Função para exportar para Excel
-    function exportToExcel() {
-        const ws = XLSX.utils.json_to_sheet(maquina.map(mq => ({
-            Máquina: mq.nome,
-            Ações: "Editar / Deletar"
-        })));
-
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Máquinas");
-
-        // Salva o arquivo Excel
-        XLSX.writeFile(wb, "Maquinas.xlsx");
-    }
 
     return (
         <div className="container-fluid mt-page">
@@ -74,39 +46,39 @@ function Maquinas() {
                     <nav aria-label="breadcrumb">
                         <ol className="breadcrumb">
                             <li className="breadcrumb-item"><Link to="/">Dashboard</Link></li>
-                            <li className="breadcrumb-item active" aria-current="page">Máquinas</li>
+                            <li className="breadcrumb-item active" aria-current="page">Beneficiamento</li>
                         </ol>
                     </nav>
 
                     <div>
-                        <Link to="/maquinas/add" className="btn btn-primary btn-clean mt-3">
-                            Nova máquina
+                        <Link to="/beneficiamentos/add" className="btn btn-primary btn-clean mt-3">
+                            Novo beneficiamento
                         </Link>
 
-                        {/* Botões de exportação */}
-                        <button onClick={exportToExcel} className="btn btn-outline-card btn-clean mt-3 ms-3">
-                            Exportar Excel
-                        </button>
                     </div>
 
                     <div style={{ marginTop: "33px" }}>
                         <table className="table table-hover table-bordered">
                             <thead>
                                 <tr>
-                                    <th scope="col">Máquina</th>
+                                    <th scope="col">Data</th>
+                                    <th scope="col">Turno</th>
+                                    <th scope="col">Operador</th>
                                     <th scope="col" className="col-buttons"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {
-                                    maquina.map((mq) => {
-                                        return <Maquina key={mq.id}
-                                                        id={mq.id}
-                                                        nome={mq.nome}
+                                    beneficiamento.map((ben) => {
+                                        return <Beneficiamento key={ben.id}
+                                                        id={ben.id}
+                                                        data={ben.data}
+                                                        turno={ben.turno.nome}
+                                                        operador={ben.usuario.nome}
                                                         ClickEdit={ClickEdit}
                                                         ClickDelete={ClickDelete}
                                         />
-                                    })
+                                    }) 
                                 }
                             </tbody>
                         </table>
@@ -123,4 +95,4 @@ function Maquinas() {
     );
 }
 
-export default Maquinas;
+export default Beneficiamentos;

@@ -6,8 +6,12 @@ function Appointment(props) {
     
     return <tr>
          <td>{props.maquina}</td>
-        <td>{
-            new Intl.DateTimeFormat('pt-BR', {dateStyle:'short'}).format(dt)
+         <td>{
+            new Intl.DateTimeFormat('pt-BR', { 
+                dateStyle: 'short', 
+                timeStyle: 'short', 
+                timeZone: 'America/Sao_Paulo' 
+            }).format(new Date(new Date(dt).getTime() + (3 * 60 * 60 * 1000))) // Ajuste de 3h
         }</td>
         <td>{props.lote}</td>
         <td>{props.lote_interno}</td>
@@ -37,7 +41,6 @@ function Appointment(props) {
                 <i className="bi bi-play-fill"></i>
             </button>
         </td>
-       
     </tr>
 }
 

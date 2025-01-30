@@ -4,17 +4,20 @@ import TimePicker from "react-time-picker";
 import "react-time-picker/dist/TimePicker.css";
 import api from "../../constants/api.js";
 import "../../styles/custom/time-picker.css"; // Arquivo CSS personalizado
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function AppointmentAdd() {
     const navigate = useNavigate();
 
     const [maquinas, setMaquinas] = useState([]);
+    const [turnos, setTurnos] = useState([]);
+
     const [time, setTime] = useState("12:00");
 
     /* inputs */
     const { id } = useParams();
     const [id_maquina, setIdMaquina] = useState(0);
+    const [id_turno, setIdTurno] = useState(0);
     const [lote, setLote] = useState("");
     const [loteInterno, setLoteInterno] = useState("");
     const [pesoB1, setPesoB1] = useState("");
@@ -31,6 +34,7 @@ function AppointmentAdd() {
     const [verificado, setVerificado] = useState(false);
 
     /* inputs error */
+    const [errorTurno, setErrorTurno] = useState("");
     const [errorMaquina, setErrorMaquina] = useState("");
     const [loteError, setLoteError] = useState("");
     const [loteInternoError, setLoteInternoError] = useState("");
@@ -45,41 +49,38 @@ function AppointmentAdd() {
     const [embalagemUtilizadaError, setEmbalagemUtilizadaError] = useState("");
     const [percaError, setPercaError] = useState("");
 
-    const formatToBrazilianCurrency = (value) => {
-        // Remove tudo que não for número ou vírgula
-        value = value.replace(/[^\d,]/g, '');
-    
-        // Substitui a vírgula por ponto, caso haja
-        value = value.replace(',', '.');
-    
-        // Limita as casas decimais para 3
-        let [integer, decimal] = value.split('.');
-    
-        if (decimal) {
-          decimal = decimal.slice(0, 3);
-        }
-    
-        // Adiciona a vírgula de volta para formato brasileiro
-        value = integer + (decimal ? ',' + decimal : '');
-    
-        // Formata o número com ponto como separador de milhar
-        const parts = value.split(',');
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Adiciona ponto a cada 3 dígitos
-    
-        return parts.join(',');
-    };
+    //const [pesos, setPesos] = useState({ pesoB1: "", pesoB2: "", pesoB3: "", pesoB4: "", pesoB5: "" });
+    //const [errors, setErrors] = useState({ pesoB1: "", pesoB2: "", pesoB3: "", pesoB4: "", pesoB5: "" });
 
-    const handleChange = (e) => {
-        let value = e.target.value;
-    
-        // Formata o valor dinamicamente ao digitar
-        const formattedValue = formatToBrazilianCurrency(value);
-    
-        setPesoB1(formattedValue);
+    const [pesos, setPesos] = useState({
+        pesoB1: "",
+        pesoB2: "",
+        pesoB3: "",
+        pesoB4: "",
+        pesoB5: "",
+    });
+    const [errors, setErrors] = useState({});
+
+    const loteRef = useRef(null);
+    const maquinaRef = useRef(null);
+    const loteInternoRef = useRef(null);
+    const pesoEmbalagemRef = useRef(null);
+    const marcaRef = useRef(null);
+    const quantidadeRef = useRef(null);
+    const embalagemUtilizadaRef = useRef(null);
+    const percaRef = useRef(null);
+    const turnoRef = useRef(null);
+     
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        const newValue = value.replace(",", ".");
+        
+        if (/^\d*\.?\d*$/.test(newValue) || newValue === "") {
+            setPesos((prev) => ({ ...prev, [name]: newValue }));
+        }
     };
 
     async function LoadMaquinas() {
-
         try {
             const response = await api.get("/maquina");
 
@@ -99,7 +100,31 @@ function AppointmentAdd() {
                 alert(error.response?.data.error);
             }
             else
-                alert("Erro ao listar máquinas.");
+                alert("Erro ao listar as máquinas.");
+        }
+    }
+
+    async function LoadTurnos() {
+        try {
+            const response = await api.get("/turno");
+
+            if (response.data) {
+                setTurnos(response.data);
+
+                // Se for modo alteração...
+                if (id > 0)
+                    LoadAppointment(id);
+            }
+
+        } catch (error) {
+            if (error.response?.data.error) {
+                if (error.response.status == 401)
+                    return navigate("/");
+
+                alert(error.response?.data.error);
+            }
+            else
+                alert("Erro ao listar os turnos.");
         }
     }
 
@@ -134,6 +159,82 @@ function AppointmentAdd() {
     }
 
     async function SaveProducao() {
+        let hasError = false;
+
+        if (id_turno === "" || id_turno === 0) {
+            setErrorTurno("Turno é obrigatório.");
+            if (!hasError) turnoRef.current?.focus();
+            hasError = true;
+        } else {
+            setErrorTurno("");
+        }
+        
+        if (id_maquina === "" || id_maquina === 0) {
+            setErrorMaquina("Máquina é obrigatório.");
+            if (!hasError) maquinaRef.current?.focus();
+            hasError = true;
+        } else {
+            setErrorMaquina("");
+        }
+        
+        if (!lote.trim()) {
+            setLoteError("Lote é obrigatório.");
+            if (!hasError) loteRef.current?.focus();
+            hasError = true;
+        } else {
+            setLoteError("");
+        }
+        
+        if (!loteInterno.trim()) {
+            setLoteInternoError("Lote Interno é obrigatório.");
+            if (!hasError) loteInternoRef.current?.focus();
+            hasError = true;
+        } else {
+            setLoteInternoError("");
+        }
+        
+        if (!pesoEmbalagem.trim()) {
+            setPesoEmbalagemError("Peso Embalagem é obrigatório.");
+            if (!hasError) pesoEmbalagemRef.current?.focus();
+            hasError = true;
+        } else {
+            setPesoEmbalagemError("");
+        }
+
+        if (!marca.trim()) {
+            setMarcaError("Marca é obrigatória.");
+            if (!hasError) marcaRef.current?.focus();
+            hasError = true;
+        } else {
+            setMarcaError("");
+        }
+
+        if (!quantidade.trim()) {
+            setQuantidadeError("Quantidade é obrigatória.");
+            if (!hasError) quantidadeRef.current?.focus();
+            hasError = true;
+        } else {
+            setQuantidadeError("");
+        }
+
+        if (!embalagemUtilizada.trim()) {
+            setEmbalagemUtilizadaError("Embalagem utilizada (KG) é obrigatória.");
+            if (!hasError) embalagemUtilizadaRef.current?.focus();
+            hasError = true;
+        } else {
+            setEmbalagemUtilizadaError("");
+        }
+
+        if (!perca.trim()) {
+            setPercaError("Perca (KG) é obrigatória.");
+            if (!hasError) percaRef.current?.focus();
+            hasError = true;
+        } else {
+            setPercaError("");
+        }
+
+        if (hasError) return;
+        
         const now = new Date();
         const localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
         .toISOString();
@@ -143,11 +244,11 @@ function AppointmentAdd() {
             maquina_id: id_maquina,
             lote: lote,
             lote_interno: loteInterno,
-            peso_b1: pesoB1,
-            peso_b2: pesoB2,
-            peso_b3: pesoB3,
-            peso_b4: pesoB4,
-            peso_b5: pesoB5,
+            peso_b1: pesos.pesoB1,
+            peso_b2: pesos.pesoB2,
+            peso_b3: pesos.pesoB3,
+            peso_b4: pesos.pesoB4,
+            peso_b5: pesos.pesoB5,
             peso_embalagem: pesoEmbalagem,
             marca: marca,
             quantidade: quantidade,
@@ -155,7 +256,9 @@ function AppointmentAdd() {
             perca: perca,
             teste_impacto: testeImpacto,
             verificado: verificado,
-            hora: localISO
+            hora: localISO,
+            turno_id: id_turno,
+            usuario_id: 13
         };
 
         try { 
@@ -183,6 +286,7 @@ function AppointmentAdd() {
 
     useEffect(() => {
         LoadMaquinas();
+        LoadTurnos();
     }, []);
 
     return (
@@ -195,9 +299,32 @@ function AppointmentAdd() {
                         <h2>Controle de Empacotamento</h2>
                     </div>
                     <div className="col-12 mt-4">
+
+                        <div className="mb-3">
+                            <label htmlFor="turno" className="form-label">Turno</label>
+                            <select
+                                ref={turnoRef}
+                                name="turno" 
+                                id="turno" 
+                                className={`form-select input-clean ${errorTurno ? 'is-invalid' : ''}`}
+                                value={id_turno} 
+                                onChange={(e) => {
+                                    setIdTurno(parseInt(e.target.value, 10));
+                                    if (e.target.value !== "0") setErrorTurno(""); // Limpa o erro se houver um valor válido
+                                }}
+                            >
+                                <option value="">Selecione o Turno</option>
+                                {turnos.map(t => (
+                                    <option key={t.id} value={t.id}>{t.nome}</option>
+                                ))}
+                            </select>
+                            {errorTurno && <div className="invalid-feedback mt-2">{errorTurno}</div>}
+                        </div>
+
                         <div className="mb-3">
                             <label htmlFor="maquina" className="form-label">Máquina</label>
-                            <select 
+                            <select
+                                ref={maquinaRef}
                                 name="maquina" 
                                 id="maquina" 
                                 className={`form-select input-clean ${errorMaquina ? 'is-invalid' : ''}`}
@@ -207,231 +334,248 @@ function AppointmentAdd() {
                                     if (e.target.value !== "0") setErrorMaquina(""); // Limpa o erro se houver um valor válido
                                 }}
                             >
-                                <option value="0">Selecione a Máquina</option>
+                                <option value="">Selecione a Máquina</option>
                                 {maquinas.map(d => (
                                     <option key={d.id} value={d.id}>{d.nome}</option>
                                 ))}
                             </select>
                             {errorMaquina && <div className="invalid-feedback mt-2">{errorMaquina}</div>}
                         </div>
-                        
-                        {/*}
-                        <div className="mb-3">
-                            <label className="form-label">Hora</label>
-                            <TimePicker
-                                onChange={setTime}
-                                value={time}
-                                disableClock // Remove o relógio analógico
-                                clearIcon={null} // Remove o ícone de limpar
-                                format="HH:mm" // Formato de hora de 24 horas
-                                className="form-control timepicker-bootstrap" // Classe personalizada para o estilo
-                            />
-                        </div> */}
-                                     
+                                                             
                         <div className="mb-3">
                             <label className="form-label">Lote</label>
+                            
                             <input 
+                                ref={loteRef}
                                 value={lote}
                                 type="text"
                                 onChange={(e) => {
                                     setLote(e.target.value);
                                     if (loteError) setLoteError("");
                                 }}
-                                className="form-control input-clean" 
+                                className={`form-control input-clean ${loteError ? 'is-invalid' : ''}`}
                                 name="lote" 
-                                id="lote" 
-                                required 
+                                id="lote"
                             />
+                            {loteError && <div className="invalid-feedback mt-2">{loteError}</div>}
                         </div>
-
+     
                         <div className="mb-3">
                             <label className="form-label">Lote Interno</label>
-                            <input 
+                            <input
+                                ref={loteInternoRef}
                                 value={loteInterno}
                                 type="text"
                                 onChange={(e) => {
                                     setLoteInterno(e.target.value);
                                     if (loteInternoError) setLoteInternoError("");
                                 }}
-                                className="form-control" 
+                                className={`form-control input-clean ${loteInternoError ? 'is-invalid' : ''}`} 
                                 name="loteInterno" 
                                 id="loteInterno" 
                                 required 
                             />
+                            {loteInternoError && <div className="invalid-feedback mt-2">{loteInternoError}</div>}
                         </div>
                                 
                         <div className="mb-3">
                             <label className="form-label">Peso B1</label>
                             <input
+                                value={pesos.pesoB1}
                                 type="text"
-                                value={pesoB1}
-                                onChange={handleChange}
-                                className="form-control"
+                                onChange={handleInputChange}
+                                className="form-control input-clean"
                                 name="pesoB1"
                                 id="pesoB1"
-                                placeholder="0,000"
                             />
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label">Peso B.2</label>
-                            <input 
-                                value={pesoB2}
+                            <label className="form-label">Peso B2</label>
+                            <input
+                                value={pesos.pesoB2}
                                 type="text"
-                                onChange={(e) => {
-                                    setPesoB2(e.target.value);
-                                    if (pesoB2Error) setPesoB2Error("");
-                                }}
-                                className="form-control" 
-                                name="pesoB2" 
-                                id="pesoB2" 
-                                required 
+                                onChange={handleInputChange}
+                                className="form-control input-clean"
+                                name="pesoB2"
+                                id="pesoB2"
                             />
                         </div>
 
                         <div className="mb-3">
                             <label className="form-label">Peso B.3</label>
                             <input 
-                                value={pesoB3}
+                                value={pesos.pesoB3}
                                 type="text"
-                                onChange={(e) => {
-                                    setPesoB3(e.target.value);
-                                    if (pesoB3Error) setPesoB3Error("");
-                                }}
-                                className="form-control" 
+                                onChange={handleInputChange}
+                                className="form-control input-clean" 
                                 name="pesoB3" 
                                 id="pesoB3" 
-                                required 
                             />
                         </div>
                         
                         <div className="mb-3">
                             <label className="form-label">Peso B.4</label>
                             <input 
-                                value={pesoB4}
+                                value={pesos.pesoB4}
                                 type="text"
-                                onChange={(e) => {
-                                    setPesoB4(e.target.value);
-                                    if (pesoB4Error) setPesoB4Error("");
-                                }}
-                                className="form-control" 
+                                onChange={handleInputChange}
+                                className="form-control input-clean" 
                                 name="pesoB4" 
                                 id="pesoB4" 
-                                required 
                             />
                         </div>
 
                         <div className="mb-3">
                             <label className="form-label">Peso B.5</label>
                             <input 
-                                value={pesoB5}
+                                value={pesos.pesoB5}
                                 type="text"
-                                onChange={(e) => {
-                                    setPesoB5(e.target.value);
-                                    if (pesoB5Error) setPesoB5Error("");
-                                }}
-                                className="form-control" 
+                                onChange={handleInputChange}
+                                className="form-control input-clean" 
                                 name="pesoB5" 
                                 id="pesoB5" 
-                                required 
                             />
                         </div>
 
                         <div className="mb-3">
                             <label className="form-label">Peso Emb.(G)</label>
                             <input 
+                                ref={pesoEmbalagemRef}
                                 value={pesoEmbalagem}
                                 type="text"
+
                                 onChange={(e) => {
-                                    setPesoEmbalagem(e.target.value);
-                                    if (pesoEmbalagemError) setPesoEmbalagemError("");
+                                    // Permite apenas números e ponto decimal
+                                    const newValue = e.target.value.replace(",", "."); // Troca vírgula por ponto
+                                    if (/^\d*\.?\d*$/.test(newValue) || newValue === "") {
+                                        setPesoEmbalagem(newValue);
+                                        if (pesoEmbalagemError) setPesoEmbalagemError("");
+                                    }
                                 }}
-                                className="form-control" 
+
+                                className={`form-control input-clean ${pesoEmbalagemError ? 'is-invalid' : ''}`}  
                                 name="pesoEmbalagem" 
                                 id="pesoEmbalagem" 
-                                required 
                             />
+                            {pesoEmbalagemError && <div className="invalid-feedback mt-2">{pesoEmbalagemError}</div>}
                         </div>
 
                         <div className="mb-3">
                             <label className="form-label">Marca</label>
                             <input 
+                                ref={marcaRef}
                                 value={marca}
                                 type="text"
                                 onChange={(e) => {
                                     setMarca(e.target.value);
                                     if (marcaError) setMarcaError("");
                                 }}
-                                className="form-control" 
+                                className={`form-control input-clean ${marcaError ? 'is-invalid' : ''}`}  
                                 name="marca" 
                                 id="marca" 
-                                required 
                             />
+                            {marcaError && <div className="invalid-feedback mt-2">{marcaError}</div>}
                         </div>
 
                         <div className="mb-3">
                             <label className="form-label">Quantidade</label>
                             <input 
+                                ref={quantidadeRef}
                                 value={quantidade}
                                 type="text"
                                 onChange={(e) => {
-                                    setQuantidade(e.target.value);
-                                    if (quantidadeError) setQuantidadeError("");
+                                    const valor = e.target.value;
+                                    if (/^\d*$/.test(valor) && valor.length <= 10) { // Permite apenas números e limita a 10 caracteres
+                                        setQuantidade(valor);
+                                        if (quantidadeError) setQuantidadeError("");
+                                    }
                                 }}
-                                className="form-control" 
+                                className={`form-control input-clean ${quantidadeError ? 'is-invalid' : ''}`} 
                                 name="quantidade" 
                                 id="quantidade" 
-                                required 
+                                maxLength={10} // Impede a digitação além de 10 caracteres no nível do input
                             />
+                            {quantidadeError && <div className="invalid-feedback mt-2">{quantidadeError}</div>}
                         </div>
 
                         <div className="mb-3">
                             <label className="form-label">Embalagem Utilizada (KG)</label>
                             <input 
+                                ref={embalagemUtilizadaRef}
                                 value={embalagemUtilizada}
                                 type="text"
                                 onChange={(e) => {
-                                    setEmbalagemUtilizada(e.target.value);
-                                    if (embalagemUtilizadaError) setEmbalagemUtilizadaError("");
+                                    // Permite apenas números e ponto decimal
+                                    const newValue = e.target.value.replace(",", "."); // Troca vírgula por ponto
+                                    if (/^\d*\.?\d*$/.test(newValue) || newValue === "") {
+                                        setEmbalagemUtilizada(newValue);
+                                        if (embalagemUtilizadaError) setEmbalagemUtilizadaError("");
+                                    }
                                 }}
-                                className="form-control" 
+                                className={`form-control input-clean ${embalagemUtilizadaError ? 'is-invalid' : ''}`} 
                                 name="embalagemUtilizada" 
                                 id="embalagemUtilizada" 
-                                required 
                             />
+                            {embalagemUtilizadaError && <div className="invalid-feedback mt-2">{embalagemUtilizadaError}</div>}
                         </div>
 
                         <div className="mb-3">
                             <label className="form-label">Perca (KG)</label>
                             <input 
+                                ref={percaRef}
                                 value={perca}
                                 type="text"
                                 onChange={(e) => {
-                                    setPerca(e.target.value);
-                                    if (percaError) setPercaError("");
+                                    // Permite apenas números e ponto decimal
+                                    const newValue = e.target.value.replace(",", "."); // Troca vírgula por ponto
+                                    if (/^\d*\.?\d*$/.test(newValue) || newValue === "") {
+                                        setPerca(newValue);
+                                        if (percaError) setPercaError("");
+                                    }
                                 }}
-                                className="form-control" 
+                                className={`form-control input-clean ${percaError ? 'is-invalid' : ''}`} 
                                 name="perca" 
                                 id="perca" 
-                                required 
                             />
+                            {percaError && <div className="invalid-feedback mt-2">{percaError}</div>}
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label">Teste impacto</label>
-                            <div className="form-check">
+                            <label className="d-block mb-2">Teste impacto</label>
+                            <label 
+                                className="border rounded p-3 d-flex align-items-center gap-3 cursor-pointer user-select-none w-100"
+                                htmlFor="testeImpacto" // Garante que o clique ative o checkbox
+                            >
                                 <input
                                     type="checkbox"
                                     className="form-check-input"
+                                    id="testeImpacto"
                                     checked={testeImpacto}
                                     onChange={(e) => setTesteImpacto(e.target.checked)}
                                 />
-                                <label className="form-check-label">
-                                    Marcar se o teste de impacto foi realizado
-                                </label>
-                            </div>
+                                <span className="mb-0">Realizado</span>
+                            </label>
                         </div>
 
+                        <div className="mb-3">
+                            <label className="d-block mb-2">Verificado</label>
+                            <label 
+                                className="border rounded p-3 d-flex align-items-center gap-3 cursor-pointer user-select-none w-100"
+                                htmlFor="verificado" // Garante que o clique ative o checkbox
+                            >
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    id="verificado"
+                                    checked={verificado}
+                                    onChange={(e) => setVerificado(e.target.checked)}
+                                />
+                                <span className="mb-0">Item foi verificado</span>
+                            </label>
+                        </div>
+
+                        {/*}
                         <div className="mb-3">
                             <label className="form-label">Verificado</label>
                             <div className="form-check">
@@ -445,14 +589,19 @@ function AppointmentAdd() {
                                     Marcar se o item foi verificado
                                 </label>
                             </div>
-                        </div>
+                        </div> */}
 
-                        <button onClick={SaveProducao} className="btn btn-primary" type="button">
+                        <button onClick={SaveProducao} className="btn btn-primary btn-clean" type="button">
                             Salvar
                         </button>
                     </div>
                 </div>
             </div>
+
+            {/* Rodapé com espaçamento */}
+            <footer className="mt-auto" style={{ padding: "50px 0", backgroundColor: "#f8f9fa", color: "#6c757d", textAlign: "center" }}>
+                <p>2025 Controle de Produção</p>
+            </footer>
         </>
     );
 }

@@ -101,6 +101,11 @@ function MaquinaAdd() {
                     </div>
                 </div>
             </div>
+
+            {/* Rodapé com espaçamento */}
+            <footer className="mt-auto" style={{ padding: "50px 0", backgroundColor: "#f8f9fa", color: "#6c757d", textAlign: "center" }}>
+                <p>2025 Controle de Produção</p>
+            </footer>
         </>
     );
 }

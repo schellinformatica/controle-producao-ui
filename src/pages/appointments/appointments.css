@@ -1,3 +1,7 @@
 .col-buttons {
     width: 120px;
 }
+
+.input-datetime-filter::placeholder {
+    text-align: center;
+  }
