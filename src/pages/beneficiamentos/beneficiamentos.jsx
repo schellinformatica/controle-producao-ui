@@ -10,7 +10,7 @@ function Beneficiamentos() {
     const [beneficiamento, setBeneficiamentos] = useState([]);
 
     function ClickEdit(id) {
-        navigate("/maquinas/edit/" + id);
+        navigate("/beneficiamentos/edit/" + id + "?step=2");
     }
 
     function ClickDelete(idConsulta) {

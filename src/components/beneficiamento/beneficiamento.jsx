@@ -1,9 +1,11 @@
 function Beneficiamento(props) {
-        
+    
+    const formattedDate = new Date(props.data).toLocaleDateString('pt-BR'); // ou outro formato desejado
+
     return ( 
         <tr style={{ cursor: 'pointer' }}>
             <td onClick={() => props.ClickEdit(props.id)}>
-                {props.data}
+                {formattedDate}
             </td>
             <td onClick={() => props.ClickEdit(props.id)}>
                 {props.turno}
