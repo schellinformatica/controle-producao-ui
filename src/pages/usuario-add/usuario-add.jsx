@@ -15,13 +15,15 @@ function UsuarioAdd() {
     const [email, setEmail] = useState("");
     const [emailError, setEmailError] = useState("");
     const emailRef = useRef(null);
+
+    const [loading, setLoading] = useState(false); // Estado para o loader
     
     async function LoadUsuario(id) {
-        /*
         try {
-            const response = await api.get("/maquina/" + id);
+            const response = await api.get("/usuario/" + id);
             if (response.data) {
                 setNome(response.data.nome);
+                setEmail(response.data.email);
             }
         } catch (error) {
             if (error.response?.data.error) {
@@ -31,7 +33,6 @@ function UsuarioAdd() {
                 setNomeError("Erro ao listar a máquina");
             }
         }
-            */
     }
 
     async function SaveUsuario() {
@@ -60,17 +61,25 @@ function UsuarioAdd() {
 
         const json = { nome, email };
 
+        // Ativa o loader
+        setLoading(true);
+
         try {
             const response = id > 0
                 ? await api.put("/usuario/" + id, json)
                 : await api.post("/usuario", json);
 
             if (response.data) {
+                // Após salvar, desativa o loader e redireciona
+                setLoading(false);
                 navigate("/usuarios");
             }
         } catch (error) {
+            // Se erro ocorrer, desativa o loader
+            setLoading(false);
             const errorMsg = error.response?.data.error || "Erro ao salvar usuário";
             setNomeError(errorMsg);
+            alert("erro");
         }
     }
 
@@ -90,6 +99,7 @@ function UsuarioAdd() {
                     <div className="col-12 mt-4">
                         <h2>{id > 0 ? "Editar Usuário" : "Novo Usuário"}</h2>
                     </div>
+                    
                     <div className="col-12 mt-4">
                         <div className="mb-3">
                             <label className="form-label">Nome</label>
@@ -105,6 +115,7 @@ function UsuarioAdd() {
                                 id="nome"
                                 name="nome"
                                 placeholder=""
+                                disabled={loading} // Desabilita o campo durante o loading
                             />
                             {nomeError && <div className="invalid-feedback mt-2">{nomeError}</div>}
                         </div>
@@ -123,14 +134,24 @@ function UsuarioAdd() {
                                 id="email"
                                 name="email"
                                 placeholder=""
+                                disabled={loading || id > 0} // Desabilita o campo durante o loading e ao editar
                             />
                             {emailError && <div className="invalid-feedback mt-2">{emailError}</div>}
                         </div>
 
-                        <button onClick={SaveUsuario} className="btn btn-primary btn-clean" type="button">
-                            Salvar
+                        <button onClick={SaveUsuario} className="btn btn-primary btn-clean" type="button" disabled={loading}>
+                            {loading ? 'Salvando...' : 'Salvar'}
                         </button>
                     </div>
+
+                    {/* Loader sobre os campos */}
+                    {loading && (
+                        <div className="d-flex justify-content-center mt-4 position-absolute" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                            <div className="spinner-border text-primary" role="status">
+                                <span className="visually-hidden">Carregando...</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

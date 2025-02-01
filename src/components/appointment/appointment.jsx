@@ -20,25 +20,25 @@ function Appointment(props) {
         <td className="text-center">{props.verificado}</td>
 
         <td className="text-end d-flex justify-content-end">
-            {/* Botão de Deletar */}
-            <button 
-                onClick={() => props.ClickDelete(props.id)} 
-                className="btn btn-sm btn-outline-card btn-clean me-2">
-                <i className="bi bi-trash"></i>
-            </button>
-
             {/* Botão de Parar Produção */}
             <button 
                 onClick={() => props.ClickParar(props.id)} 
-                className="btn btn-sm btn-outline-card btn-clean me-2"> 
+                className="btn btn-sm btn-outline-secondary btn-clean me-2"> 
                 <i className="bi bi-pause-fill"></i>
             </button>
 
             {/* Botão de Retomar Produção */}
             <button 
                 onClick={() => props.ClickRetomar(props.id)} 
-                className="btn btn-sm btn-outline-card btn-clean">
+                className="btn btn-sm btn-outline-secondary btn-clean me-2">
                 <i className="bi bi-play-fill"></i>
+            </button>
+
+            {/* Botão de Deletar */}
+            <button 
+                onClick={() => props.ClickDelete(props.id)} 
+                className="btn btn-sm btn-outline-danger btn-clean me-2">
+                <i className="bi bi-trash"></i>
             </button>
         </td>
     </tr>

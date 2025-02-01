@@ -1,4 +1,12 @@
 .no-data-row {
     height: 50px;
     vertical-align: middle;
-  }
+}
+
+.btn-default-with-next-and-avance {
+  min-width: 180px;  /* Garante uma largura mínima */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px; /* Espaço entre o ícone e o texto */
+}

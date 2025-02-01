@@ -69,8 +69,98 @@ select {
 }
 
 
+/* Botão de perigo com tom suave */
+/* Estilos base para botões outline */
+.btn-outline {
+    border-width: 1px;
+    background-color: transparent;
+    transition: all 0.2s ease-in-out;
+}
 
+/* Botão Primário Suave */
+.btn-outline-primary {
+    border-color: #6c9ff3;
+    color: #6c9ff3;
+}
 
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: #e3edfd;
+    color: #4a82e0;
+    border-color: #4a82e0;
+}
+
+/* Botão Secundário Suave */
+.btn-outline-secondary {
+    border-color: #b0b3b8;
+    color: #6c757d;
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+    background-color: #e6e7e9;
+    color: #4f5257;
+    border-color: #4f5257;
+}
+
+/* Botão Sucesso Suave */
+.btn-outline-success {
+    border-color: #70c48f;
+    color: #4aa56d;
+}
+
+.btn-outline-success:hover,
+.btn-outline-success:focus {
+    background-color: #e3f6e9;
+    color: #3b8e59;
+    border-color: #3b8e59;
+}
+
+/* Botão Perigo Suave */
+.btn-outline-danger {
+    border-color: #f28c8c;
+    color: #d9534f;
+}
+
+.btn-outline-danger:hover,
+.btn-outline-danger:focus {
+    background-color: #fde8e8;
+    color: #b52b27;
+    border-color: #b52b27;
+}
+
+/* Botão Aviso Suave */
+.btn-outline-warning {
+    border-color: #f1c16c;
+    color: #c99729;
+}
+
+.btn-outline-warning:hover,
+.btn-outline-warning:focus {
+    background-color: #fff4db;
+    color: #a1781d;
+    border-color: #a1781d;
+}
+
+/* Botão Azul Personalizado */
+.btn-outline-blue {
+    border-color: #5c8ee6;
+    color: #5c8ee6;
+}
+
+.btn-outline-blue:hover,
+.btn-outline-blue:focus {
+    background-color: #dce8fc;
+    color: #3b6fc4;
+    border-color: #3b6fc4;
+}
+
+/* Botão Desabilitado (Padrão) */
+.btn-outline:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    background-color: transparent;
+}
 
 
 
@@ -153,3 +243,12 @@ select {
 .table th {
     padding: 0.9rem;
 }
+
+
+
+.btn-default-formatted {
+    min-width: 180px;  /* Garante uma largura mínima */
+    justify-content: center;
+    align-items: center;
+    gap: 8px; /* Espaço entre o ícone e o texto */
+  }

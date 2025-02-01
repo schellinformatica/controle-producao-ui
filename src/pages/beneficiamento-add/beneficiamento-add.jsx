@@ -26,12 +26,23 @@ const BeneficiamentoEdit = () => {
   });
 
   const [step, setStep] = useState(1);
+  const [turnos, setTurnos] = useState([]); // Estado para armazenar os turnos
+  const [maquinas, setMaquinas] = useState([]); // Estado para armazenar as máquinas
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const stepParam = urlParams.get('step');
     if (stepParam) setStep(Number(stepParam));
+
     if (id > 0) carregarBeneficiamento();
+    carregarTurnos();
+    carregarMaquinas();  // Carrega as máquinas
+
+    const dataAtual = new Date().toISOString().split('T')[0];  // Formato yyyy-mm-dd
+    setBeneficiamento((prev) => ({
+      ...prev,
+      data: dataAtual,
+    }));
   }, [location.search]);
 
   const carregarBeneficiamento = async () => {
@@ -56,6 +67,24 @@ const BeneficiamentoEdit = () => {
       ...prev,
       beneficiamentos_itens: itens,
     }));
+  };
+
+  const carregarTurnos = async () => {
+    try {
+      const response = await api.get('/turno');
+      setTurnos(response.data); // Atualiza os turnos no estado
+    } catch (error) {
+      console.error('Erro ao carregar turnos:', error);
+    }
+  };
+
+  const carregarMaquinas = async () => {
+    try {
+      const response = await api.get('/maquina');  // Carrega as máquinas
+      setMaquinas(response.data); // Atualiza o estado com as máquinas
+    } catch (error) {
+      console.error('Erro ao carregar máquinas:', error);
+    }
   };
 
   const handleChange = (e) => {
@@ -91,14 +120,9 @@ const BeneficiamentoEdit = () => {
     };
 
     try {
-      // Salva no banco de dados via API
-      await api.post("/beneficiamento_item", novoBeneficiamentoItem);
-
-      // Atualiza a tabela local com o novo item
-      setBeneficiamento((prev) => ({
-        ...prev,
-        beneficiamentos_itens: [...(prev.beneficiamentos_itens || []), novoBeneficiamentoItem],
-      }));
+      const responseItem = await api.post("/beneficiamento_item", novoBeneficiamentoItem);
+      const response = await api.get('/beneficiamento/' + novoBeneficiamentoItem.beneficiamento_id);
+      setBeneficiamento(response.data);
 
       setHoraInput({
         hora: '',
@@ -179,13 +203,19 @@ const BeneficiamentoEdit = () => {
 
                   <div className="col-md-4">
                     <label className="form-label">Turno</label>
-                    <input
-                      type="number"
+                    <select
                       name="turno_id"
-                      className="form-control input-clean"
+                      className="form-select input-clean"
                       onChange={handleChange}
                       value={beneficiamento.turno_id}
-                    />
+                    >
+                      <option value="">Selecione um turno</option>
+                      {turnos.map((turno) => (
+                        <option key={turno.id} value={turno.id}>
+                          {turno.nome}
+                        </option>
+                      ))}
+                    </select>                    
                   </div>
 
                   <div className="col-md-4">
@@ -199,9 +229,14 @@ const BeneficiamentoEdit = () => {
                     />
                   </div>
 
-                  <button type="button" className="btn btn-primary btn-clean mt-4" onClick={salvarBeneficiamento}>
-                    Avançar para Horários
-                  </button>
+                  <div className="d-flex justify-content-between mt-4">
+                    <Link to="/beneficiamentos" className="btn btn-outline-secondary btn-clean btn-default-formatted">
+                      <i className="bi bi-arrow-left"></i> Voltar
+                    </Link>
+                    <button type="button" className="btn btn-primary btn-default-formatted btn-clean" onClick={salvarBeneficiamento}>
+                      Avançar <i className="bi bi-arrow-right"></i>
+                    </button>
+                  </div>
                 </>
               )}
 
@@ -220,6 +255,23 @@ const BeneficiamentoEdit = () => {
                     </div>
 
                     <div className="col-md-2">
+                      <select
+                        name="producao_brunidor_1"
+                        className="form-select input-clean"
+                        value={horaInput.producao_brunidor_1}
+                        onChange={handleHoraChange}
+                      >
+                        <option value="" disabled hidden>Máquina 1</option>
+                        {maquinas.map((maquina) => (
+                          <option key={maquina.id} value={maquina.id}>
+                            {maquina.nome}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/*
+                    <div className="col-md-2">
                       <input
                         type="number"
                         name="producao_brunidor_1"
@@ -228,8 +280,25 @@ const BeneficiamentoEdit = () => {
                         value={horaInput.producao_brunidor_1}
                         onChange={handleHoraChange}
                       />
-                    </div>
+                    </div>*/}
 
+                    <div className="col-md-2">
+                      <select
+                        name="producao_polidor_2"
+                        className="form-select input-clean"
+                        value={horaInput.producao_polidor_2}
+                        onChange={handleHoraChange}
+                      >
+                        <option value="" disabled hidden>Máquina 2</option>
+                        {maquinas.map((maquina) => (
+                          <option key={maquina.id} value={maquina.id}>
+                            {maquina.nome}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    {/*
                     <div className="col-md-2">
                       <input
                         type="number"
@@ -239,7 +308,7 @@ const BeneficiamentoEdit = () => {
                         value={horaInput.producao_polidor_2}
                         onChange={handleHoraChange}
                       />
-                    </div>
+                    </div> */}
 
                     <div className="col-md-2">
                       <input
@@ -291,14 +360,14 @@ const BeneficiamentoEdit = () => {
                         beneficiamento.beneficiamentos_itens.map((item, index) => (
                           <tr key={index}>
                             <td className="text-center">{new Date(item.hora).toLocaleTimeString()}</td>
-                            <td className="text-center">{item.maquina_id_1}</td>
-                            <td className="text-center">{item.maquina_id_2}</td>
+                            <td className="text-center">{item.maquina_1.nome}</td> {/* item.maquina_1.nome */}
+                            <td className="text-center">{item.maquina_2.nome}</td>
                             <td className="text-center">{item.tonelada_hora}</td>
                             <td className="text-center">{item.tonelada_hora}</td>
                             <td className="text-center align-middle">
                               <button
                                 type="button"
-                                className="btn btn-sm btn-outline-card btn-clean"
+                                className="btn btn-sm btn-outline-danger btn-clean"
                                 onClick={() => removerHora(index)}
                               >
                                 <i className="bi bi-trash"></i>

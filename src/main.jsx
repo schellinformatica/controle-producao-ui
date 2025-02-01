@@ -5,6 +5,10 @@ import { createRoot } from 'react-dom/client'
 
 import Rotas from "./rotas.jsx";
 
+import { AuthProvider } from "./pages/login/AuthProvider.jsx";
+
 createRoot(document.getElementById('root')).render(
-  <Rotas />
+  <AuthProvider>
+    <Rotas />
+  </AuthProvider>
 )

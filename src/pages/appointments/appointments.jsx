@@ -77,17 +77,79 @@ function Appointments() {
     };
 
     function exportToExcel() {
-        const ws = XLSX.utils.json_to_sheet(appointments.map(mq => ({
+        const totalRegistros = appointments.length;
+    
+        const totalPesoEmbalagem = appointments.reduce((acc, mq) => acc + (mq.peso_embalagem || 0), 0);
+        const totalQuantidade = appointments.reduce((acc, mq) => acc + (mq.quantidade || 0), 0);
+        const mediaPesoPacotes = totalQuantidade > 0 ? (totalPesoEmbalagem / totalQuantidade).toFixed(3) : 0;
+    
+        const totalizador = {
+            Máquina: "Total",
+            Data: "",
+            Lote: "",
+            Lote_Interno: "",
+            Marca: "",
+            Perca: appointments.reduce((acc, mq) => acc + (mq.perca || 0), 0),
+            Peso_B1: appointments.reduce((acc, mq) => acc + (mq.peso_b1 || 0), 0),
+            Peso_B2: appointments.reduce((acc, mq) => acc + (mq.peso_b2 || 0), 0),
+            Peso_B3: appointments.reduce((acc, mq) => acc + (mq.peso_b3 || 0), 0),
+            Peso_B4: appointments.reduce((acc, mq) => acc + (mq.peso_b4 || 0), 0),
+            Peso_B5: appointments.reduce((acc, mq) => acc + (mq.peso_b5 || 0), 0),
+            Peso_Embalagem: totalPesoEmbalagem,
+            Quantidade: totalQuantidade,
+            Teste_Impacto: "",
+            Verificado: ""
+        };
+    
+        const mediaizador = {
+            Máquina: "Média",
+            Data: "",
+            Lote: "",
+            Lote_Interno: "",
+            Marca: "",
+            Perca: (totalizador.Perca / totalRegistros).toFixed(3),
+            Peso_B1: (totalizador.Peso_B1 / totalRegistros).toFixed(3),
+            Peso_B2: (totalizador.Peso_B2 / totalRegistros).toFixed(3),
+            Peso_B3: (totalizador.Peso_B3 / totalRegistros).toFixed(3),
+            Peso_B4: (totalizador.Peso_B4 / totalRegistros).toFixed(3),
+            Peso_B5: (totalizador.Peso_B5 / totalRegistros).toFixed(3),
+            Peso_Embalagem: (totalPesoEmbalagem / totalRegistros).toFixed(3),
+            Quantidade: (totalQuantidade / totalRegistros).toFixed(3),
+            Média_Peso_Pacote: mediaPesoPacotes, // Adiciona a média correta dos pacotes
+            Teste_Impacto: "",
+            Verificado: ""
+        };
+    
+        // Criar a planilha com os dados
+        const data = appointments.map(mq => ({
             Máquina: mq.maquina.nome,
-            Ações: "Editar / Deletar"
-        })));
-
+            Data: mq.hora,
+            Lote: mq.lote,
+            Lote_Interno: mq.lote_interno,
+            Marca: mq.marca,
+            Perca: mq.perca,
+            Peso_B1: mq.peso_b1,
+            Peso_B2: mq.peso_b2,
+            Peso_B3: mq.peso_b3,
+            Peso_B4: mq.peso_b4,
+            Peso_B5: mq.peso_b5,
+            Peso_Embalagem: mq.peso_embalagem,
+            Quantidade: mq.quantidade,
+            Teste_Impacto: mq.teste_impacto,
+            Verificado: mq.verificado
+        }));
+    
+        // Adicionar a linha de total e média ao final
+        data.push(totalizador);
+        data.push(mediaizador);
+    
+        const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Empacotamento");
-
+    
         // Salva o arquivo Excel
         XLSX.writeFile(wb, "Empacotamento.xlsx");
-    }
+    }    
 
     return (
         <div className="container-fluid mt-page">
@@ -105,8 +167,8 @@ function Appointments() {
                         <Link to="/appointments/add" className="btn btn-primary btn-clean mt-3">
                             Novo empacotamento
                         </Link>
-                        <button className="btn btn-outline-card btn-clean mt-3 ms-3" onClick={exportToExcel}>
-                            Exportar Excel
+                        <button className="btn btn-outline-secondary btn-clean mt-3 ms-3" onClick={exportToExcel}>
+                            <i class="bi bi-file-earmark-excel-fill"></i>
                         </button>
                         
                         <div className="d-flex align-items-center ms-auto mt-3">
@@ -128,8 +190,11 @@ function Appointments() {
                                 locale="pt-BR"
                                 placeholderText="Data Fim"
                             />
-                            <button className="btn btn-outline-card btn-clean ms-3" onClick={handleFilterChange}>
-                                Aplicar Filtro
+
+
+
+                            <button className="btn btn-outline-secondary btn-clean ms-3" onClick={handleFilterChange}>
+                                <i className="bi bi-filter"></i>
                             </button>
                         </div>
                     </div>
