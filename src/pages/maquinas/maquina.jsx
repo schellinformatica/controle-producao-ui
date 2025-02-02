@@ -160,7 +160,7 @@ function Maquinas() {
 
                     <div style={{ marginTop: "33px" }}>
                         <table className="table table-hover table-bordered">
-                            <thead>
+                            <thead className="table-light">
                                 <tr>
                                     <th scope="col">Máquina</th>
                                     <th scope="col" className="col-buttons"></th>
@@ -168,7 +168,12 @@ function Maquinas() {
                             </thead>
                             <tbody>
                                 {maquinas.map((mq) => (
-                                    <Maquina key={mq.id} id={mq.id} nome={mq.nome} ClickEdit={ClickEdit} confirmDelete={() => confirmDelete(mq)} />
+                                    <Maquina 
+                                    key={mq.id}
+                                    id={mq.id}
+                                    nome={mq.nome}
+                                    ClickEdit={ClickEdit}
+                                    confirmDelete={() => confirmDelete(mq)} />
                                 ))}
                             </tbody>
                         </table>

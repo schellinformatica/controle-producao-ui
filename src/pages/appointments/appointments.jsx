@@ -22,6 +22,8 @@ function Appointments() {
     const [action, setAction] = useState("");
     const [reason, setReason] = useState("");
 
+    const [showModalExclusao, setShowModalExclusao] = useState(false);
+
     async function LoadAppointments() {
         try {
             let url = "/production";
@@ -35,6 +37,15 @@ function Appointments() {
         } catch (error) {
             alert("Erro ao carregar consultas.");
         }
+    }
+
+    function ClickEdit(id) {
+        navigate("/appointments/edit/" + id);
+    }
+
+    function confirmDelete(apt) {
+        setSelectedAppointment(apt);
+        setShowModalExclusao(true);
     }
 
     const handleFilterChange = () => {
@@ -75,6 +86,26 @@ function Appointments() {
             alert("Erro ao " + action + " a produção: " + error.response?.data?.error || error.message);
         }
     };
+
+    async function ClickDelete() {
+        if (!selectedAppointment) return;
+        try {
+            const response = await api.delete("/production/" + selectedAppointment.id);
+            if (response.data) {
+                setAppointments((prevAppointment) => prevAppointment.filter(apt => apt.id !== selectedAppointment.id));
+            }
+        } catch (error) {
+            if (error.response?.data.error) {
+                if (error.response.status === 401) return navigate("/");
+                alert(error.response?.data.error);
+            } else {
+                alert("Erro ao excluir empacotamento.");
+            }
+        } finally {
+            setShowModalExclusao(false);
+            setSelectedAppointment(null);
+        }
+    }    
 
     function exportToExcel() {
         const totalRegistros = appointments.length;
@@ -199,7 +230,6 @@ function Appointments() {
                         </div>
                     </div>
 
-
                     <div style={{ marginTop: "33px" }}>
                         <table className="table table-hover table-bordered">
                             <thead className="table-light">
@@ -226,9 +256,10 @@ function Appointments() {
                                             marca={ap.marca}
                                             media_peso={ap.media_peso}
                                             quantidade={ap.quantidade}
-                                            ClickDelete={() => console.log("deletar: " + ap.id)}
+                                            confirmDelete={() => confirmDelete(ap)}
                                             ClickParar={handleParar}
                                             ClickRetomar={handleRetomar}
+                                            ClickEdit={ClickEdit}
                                         />
                                     ))
                                 }
@@ -276,6 +307,35 @@ function Appointments() {
                     </div>
                 </div>
             )}
+
+            {showModalExclusao && selectedAppointment && (
+                <div className="modal show d-block" tabIndex="-1" role="dialog" style={{ background: "rgba(0,0,0,0.5)" }}>
+                    <div className="modal-dialog" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header border-0">
+                                <h5 className="modal-title">Atenção</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowModalExclusao(false)}></button>
+                            </div>
+   
+                            <div className="modal-body text-center">
+                                <p style={{ wordBreak: "break-word", overflowWrap: "break-word", fontSize: "1rem" }}>
+                                    Você está prestes a excluir o empacotamento{" "} 
+                                    <strong style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", verticalAlign: "middle", maxWidth: "100%", display: "inline-block" }}>
+                                        {" "}{selectedAppointment?.id}
+                                    </strong>.
+                                </p>
+                                <p>Confirmar a exclusão?</p>
+                            </div>
+
+                            <div className="modal-footer border-0 justify-content-center">
+                                <button type="button" className="btn btn-outline-secondary btn-clean" onClick={() => setShowModalExclusao(false)}>Cancelar</button>
+                                <button type="button" className="btn btn-danger btn-clean" onClick={ClickDelete}>Confirmar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
             {/* Rodapé com espaçamento */}
             <footer className="mt-auto" style={{ padding: "50px 0", backgroundColor: "#f8f9fa", color: "#6c757d", textAlign: "center" }}>

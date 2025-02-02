@@ -17,7 +17,7 @@ function AppointmentAdd() {
     /* inputs */
     const { id } = useParams();
     const [id_maquina, setIdMaquina] = useState(0);
-    const [id_turno, setIdTurno] = useState(0);
+    const [id_turno, setIdTurno] = useState("");
     const [lote, setLote] = useState("");
     const [loteInterno, setLoteInterno] = useState("");
     const [pesoB1, setPesoB1] = useState("");
@@ -150,21 +150,38 @@ function AppointmentAdd() {
     async function LoadAppointment(id) {
 
         try {
-            const response = await api.get("/appointments/" + id);
+            const response = await api.get("/production/" + id);
 
             if (response.data) {
-                /*
-                const date = new Date(response.data.booking_date);
-                const dateOnly = date.toISOString().split("T")[0];
+                if (response.data) {
+                    setIdTurno(response.data.turno_id);
+                    setIdMaquina(response.data.maquina_id);
+                    setLote(response.data.lote);
+                    setLoteInterno(response.data.lote_interno);
 
-                setIdDoctor(response.data.id_doctor);
-                setIdService(response.data.id_service);
-                setBookingDate(dateOnly);
-                setBookingHour(response.data.booking_hour);
-                setPatientName(response.data.patient_name);
-                */
+                    setPesos({
+                        pesoB1: response.data.peso_b1,
+                        pesoB2: response.data.peso_b2,
+                        pesoB3: response.data.peso_b3,
+                        pesoB4: response.data.peso_b4,
+                        pesoB5: response.data.peso_b5
+                    });
+
+                    setPesoB1(response.data.peso_b1);
+                    setPesoB2(response.data.peso_b2);
+                    setPesoB3(response.data.peso_b3);
+                    setPesoB4(response.data.peso_b4);
+                    setPesoB5(response.data.peso_b5);
+                    setPesoEmbalagem(response.data.peso_embalagem);
+                    setMarca(response.data.marca);
+                    setQuantidade(response.data.quantidade);
+                    setEmbalagemUtilizada(response.data.embalagem_utilizada);
+                    setPerca(response.data.perca);
+                    setTesteImpacto(response.data.teste_impacto);
+                    setVerificado(response.data.verificado);
+                    setUsuarioSelecionado(response.data.usuario_verificador_id);
+                }
             }
-
         } catch (error) {
             if (error.response?.data.error) {
                 if (error.response.status == 401)

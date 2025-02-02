@@ -1,47 +1,58 @@
 function Appointment(props) {
-    
-    //const dt = new Date(`${props.data_producao}T00:00:00`);
+    const dt = new Date(props.hora);
 
-    const dt = new Date(props.hora); // Formato YYYY-MM-DD
-    
-    return <tr>
-         <td>{props.maquina}</td>
-         <td>{
-            new Intl.DateTimeFormat('pt-BR', { 
-                dateStyle: 'short', 
-                timeStyle: 'short', 
-                timeZone: 'America/Sao_Paulo' 
-            }).format(new Date(new Date(dt).getTime() + (3 * 60 * 60 * 1000))) // Ajuste de 3h
-        }</td>
-        <td>{props.lote}</td>
-        <td>{props.lote_interno}</td>
-        <td>{props.marca}</td>
-        <td className="text-end">{props.media_peso}</td>
-        <td className="text-end">{props.quantidade}</td>
+    const handleRowClick = () => {
+        props.ClickEdit(props.id);
+    };
 
-        <td className="text-end d-flex justify-content-end">
-            {/* Botão de Parar Produção */}
-            <button 
-                onClick={() => props.ClickParar(props.id)} 
-                className="btn btn-sm btn-outline-secondary btn-clean me-2"> 
-                <i className="bi bi-pause-fill"></i>
-            </button>
+    const stopPropagation = (event) => {
+        event.stopPropagation();
+    };
 
-            {/* Botão de Retomar Produção */}
-            <button 
-                onClick={() => props.ClickRetomar(props.id)} 
-                className="btn btn-sm btn-outline-secondary btn-clean me-2">
-                <i className="bi bi-play-fill"></i>
-            </button>
+    return (
+        <tr style={{ cursor: 'pointer' }} onClick={handleRowClick}>
+            <td>{props.maquina}</td>
+            <td>
+                {new Intl.DateTimeFormat('pt-BR', {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                    timeZone: 'America/Sao_Paulo'
+                }).format(new Date(new Date(dt).getTime() + (3 * 60 * 60 * 1000)))}
+            </td>
+            <td>{props.lote}</td>
+            <td>{props.lote_interno}</td>
+            <td>{props.marca}</td>
+            <td className="text-end">{props.media_peso}</td>
+            <td className="text-end">{props.quantidade}</td>
 
-            {/* Botão de Deletar */}
-            <button 
-                onClick={() => props.ClickDelete(props.id)} 
-                className="btn btn-sm btn-outline-secondary btn-clean me-2">
-                <i className="bi bi-trash"></i>
-            </button>
-        </td>
-    </tr>
+            <td className="text-end d-flex justify-content-end" onClick={stopPropagation}>
+                
+                <button
+                    onClick={(e) => { stopPropagation(e); props.ClickViewHours(props.id); }}
+                    className="btn btn-sm btn-outline-secondary btn-clean me-2">
+                    <i className="bi bi-view-list"></i>
+                </button>
+                
+                <button
+                    onClick={(e) => { stopPropagation(e); props.ClickParar(props.id); }}
+                    className="btn btn-sm btn-outline-secondary btn-clean me-2">
+                    <i className="bi bi-pause-fill"></i>
+                </button>
+
+                <button
+                    onClick={(e) => { stopPropagation(e); props.ClickRetomar(props.id); }}
+                    className="btn btn-sm btn-outline-secondary btn-clean me-2">
+                    <i className="bi bi-play-fill"></i>
+                </button>
+
+                <button
+                    onClick={(e) => { stopPropagation(e); props.confirmDelete(props.id); }}
+                    className="btn btn-sm btn-outline-secondary btn-clean me-2">
+                    <i className="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+    );
 }
 
 export default Appointment;

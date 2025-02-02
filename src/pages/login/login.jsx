@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
-import logo from "../../assets/sua_logo.png";
+import logo from "../../assets/logo-campo-fino.png";
 import api from "../../constants/api.js";
 
 function Login() {

@@ -59,7 +59,7 @@ function Beneficiamentos() {
 
                     <div style={{ marginTop: "33px" }}>
                         <table className="table table-hover table-bordered">
-                            <thead>
+                            <thead className="table-light">
                                 <tr>
                                     <th scope="col">Data</th>
                                     <th scope="col">Turno</th>
