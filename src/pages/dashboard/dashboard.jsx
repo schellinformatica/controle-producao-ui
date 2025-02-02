@@ -50,6 +50,25 @@ function Dashboard() {
         }
     };
 
+    async function LoadDashboard(currentPage = 1) {
+        try {
+            const response = await api.get('/dashboard');
+            // const maquinaData = response.data;
+
+        } catch (error) {
+            if (error.response?.data.error) {
+                if (error.response.status === 401) return navigate("/");
+                alert(error.response?.data.error);
+            } else {
+                alert("Erro ao carregar o dashboard.");
+            }
+        }
+    }
+
+    useEffect(() => {
+        LoadDashboard();
+    }, []);
+
     return (
         <div className="container-fluid mt-page">
             <NavBar />

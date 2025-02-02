@@ -209,8 +209,8 @@ function Appointments() {
                                     <th scope="col">Lote</th>
                                     <th scope="col">Lote Interno</th>
                                     <th scope="col">Marca</th>
+                                    <th scope="col" className="text-end">Média Pesos</th>
                                     <th scope="col" className="text-end">Quantidade</th>
-                                    <th scope="col" className="text-center">Verificado</th>
                                     <th scope="col" className="col-buttons"></th>
                                 </tr>
                             </thead>
@@ -224,8 +224,8 @@ function Appointments() {
                                             lote={ap.lote}
                                             lote_interno={ap.lote_interno}
                                             marca={ap.marca}
+                                            media_peso={ap.media_peso}
                                             quantidade={ap.quantidade}
-                                            verificado={ap.verificado}
                                             ClickDelete={() => console.log("deletar: " + ap.id)}
                                             ClickParar={handleParar}
                                             ClickRetomar={handleRetomar}

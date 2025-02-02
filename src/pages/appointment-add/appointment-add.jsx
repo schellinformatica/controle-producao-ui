@@ -32,7 +32,8 @@ function AppointmentAdd() {
     const [perca, setPerca] = useState("");
     const [testeImpacto, setTesteImpacto] = useState(false);
     const [verificado, setVerificado] = useState(false);
-
+    const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
+    
     /* inputs error */
     const [errorTurno, setErrorTurno] = useState("");
     const [errorMaquina, setErrorMaquina] = useState("");
@@ -48,9 +49,7 @@ function AppointmentAdd() {
     const [quantidadeError, setQuantidadeError] = useState("");
     const [embalagemUtilizadaError, setEmbalagemUtilizadaError] = useState("");
     const [percaError, setPercaError] = useState("");
-
-    //const [pesos, setPesos] = useState({ pesoB1: "", pesoB2: "", pesoB3: "", pesoB4: "", pesoB5: "" });
-    //const [errors, setErrors] = useState({ pesoB1: "", pesoB2: "", pesoB3: "", pesoB4: "", pesoB5: "" });
+    const [usuarios, setUsuarios] = useState([]);
 
     const [pesos, setPesos] = useState({
         pesoB1: "",
@@ -79,6 +78,26 @@ function AppointmentAdd() {
             setPesos((prev) => ({ ...prev, [name]: newValue }));
         }
     };
+
+    async function LoadUsuarios() {
+        try {
+            const response = await api.get("/usuario");
+
+            if (response.data) {
+                setUsuarios(response.data);
+            }
+
+        } catch (error) {
+            if (error.response?.data.error) {
+                if (error.response.status == 401)
+                    return navigate("/");
+
+                alert(error.response?.data.error);
+            }
+            else
+                alert("Erro ao listar os usuários.");
+        }
+    }
 
     async function LoadMaquinas() {
         try {
@@ -240,6 +259,8 @@ function AppointmentAdd() {
         .toISOString();
         //.slice(0, -1); // Remove o 'Z' do final
         
+        const usuario_id = localStorage.getItem('sessionId');  // ou do cookie, dependendo de onde você armazena
+        
         const json = {
             maquina_id: id_maquina,
             lote: lote,
@@ -258,18 +279,11 @@ function AppointmentAdd() {
             verificado: verificado,
             hora: localISO,
             turno_id: id_turno,
-            usuario_id: 13
+            usuario_id: parseInt(usuario_id, 10),
+            usuario_verificador_id: verificado ? parseInt(usuarioSelecionado, 10) : null,
         };
 
         try { 
-            /*
-            const response = await api.post("/production", json, {
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
-            */
-
             const response = id > 0
                 ? await api.put("/production/" + id, json)
                 : await api.post("/production", json);
@@ -280,13 +294,22 @@ function AppointmentAdd() {
         } catch (error) {
             const errorMsg = error.response?.data.error || "Erro ao salvar máquina";
             alert(errorMsg);
-            // setNomeError(errorMsg);
         }
-    }   
+    }  
+     
+    const calcularMedia = () => {
+        const valores = Object.values(pesos)
+            .map(v => parseFloat(v.replace(",", "."))) // Converter para número e substituir vírgula por ponto
+            .filter(v => !isNaN(v)); // Remover valores inválidos
+    
+        return valores.length ? (valores.reduce((a, b) => a + b, 0) / valores.length).toFixed(2) : "0.00";
+    };
 
     useEffect(() => {
         LoadMaquinas();
         LoadTurnos();
+
+        LoadUsuarios();
     }, []);
 
     return (
@@ -438,6 +461,12 @@ function AppointmentAdd() {
                             />
                         </div>
 
+                        {/* Exibir a média calculada */}
+                        <div className="mb-3">
+                            <label className="form-label">Média dos Pesos:</label>
+                            <input type="text" value={calcularMedia()} className="form-control input-clean" readOnly disabled />
+                        </div>
+
                         <div className="mb-3">
                             <label className="form-label">Peso Emb.(G)</label>
                             <input 
@@ -575,21 +604,24 @@ function AppointmentAdd() {
                             </label>
                         </div>
 
-                        {/*}
-                        <div className="mb-3">
-                            <label className="form-label">Verificado</label>
-                            <div className="form-check">
-                                <input
-                                    type="checkbox"
-                                    className="form-check-input"
-                                    checked={verificado}
-                                    onChange={(e) => setVerificado(e.target.checked)}
-                                />
-                                <label className="form-check-label">
-                                    Marcar se o item foi verificado
-                                </label>
+                        {/* Campo select para escolher o usuário, visível apenas quando "verificado" for marcado */}
+                        {verificado && (
+                            <div className="mb-3">
+                                <label htmlFor="usuario" className="form-label">Usuário que verificou</label>
+                                <select
+                                    name="usuario_verificador"
+                                    id="usuario_verificador"
+                                    className="form-select input-clean"
+                                    value={usuarioSelecionado}
+                                    onChange={(e) => setUsuarioSelecionado(e.target.value)}
+                                >
+                                    <option value="">Selecione o usuário</option>
+                                    {usuarios.map(usuario => (
+                                        <option key={usuario.id} value={usuario.id}>{usuario.nome}</option>
+                                    ))}
+                                </select>
                             </div>
-                        </div> */}
+                        )}
 
                         <button onClick={SaveProducao} className="btn btn-primary btn-clean" type="button">
                             Salvar
@@ -598,7 +630,6 @@ function AppointmentAdd() {
                 </div>
             </div>
 
-            {/* Rodapé com espaçamento */}
             <footer className="mt-auto" style={{ padding: "50px 0", backgroundColor: "#f8f9fa", color: "#6c757d", textAlign: "center" }}>
                 <p>2025 Controle de Produção</p>
             </footer>

@@ -16,8 +16,8 @@ function Appointment(props) {
         <td>{props.lote}</td>
         <td>{props.lote_interno}</td>
         <td>{props.marca}</td>
+        <td className="text-end">{props.media_peso}</td>
         <td className="text-end">{props.quantidade}</td>
-        <td className="text-center">{props.verificado}</td>
 
         <td className="text-end d-flex justify-content-end">
             {/* Botão de Parar Produção */}
@@ -37,7 +37,7 @@ function Appointment(props) {
             {/* Botão de Deletar */}
             <button 
                 onClick={() => props.ClickDelete(props.id)} 
-                className="btn btn-sm btn-outline-danger btn-clean me-2">
+                className="btn btn-sm btn-outline-secondary btn-clean me-2">
                 <i className="bi bi-trash"></i>
             </button>
         </td>

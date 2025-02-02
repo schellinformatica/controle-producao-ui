@@ -1,8 +1,21 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../../constants/api";
 import "./navbar.css";
 
 function NavBar() {
+    const navigate = useNavigate();
+
     const sessionName = localStorage.getItem("sessionName");
+
+    function Logout() {
+        localStorage.removeItem("sessionToken");
+        localStorage.removeItem("sessionId");
+        localStorage.removeItem("sessionEmail");
+        localStorage.removeItem("sessionName");
+
+        navigate("/");
+        api.defaults.headers.common['Authorization'] = "";
+    }
 
     return (
         <nav className="navbar fixed-top navbar-expand-lg bg-primary" data-bs-theme="dark">
@@ -30,7 +43,7 @@ function NavBar() {
                             <Link className="nav-link" to="/maquinas">Máquinas</Link>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link" to="/usuarios">Usuários</Link>
+                            <Link className="nav-link" to="/usuario">Usuários</Link>
                         </li>
                     </ul>
 
@@ -53,7 +66,7 @@ function NavBar() {
                                         <Link className="dropdown-item" to="/usuario-perfil">Meu perfil</Link>
                                     </li>
                                     <li>
-                                        <button className="dropdown-item" onClick={() => {/* Ação de logout */}}>Desconectar</button>
+                                        <button className="dropdown-item" onClick={Logout}>Desconectar</button>
                                     </li>
                                 </ul>
                             </div>

@@ -13,26 +13,36 @@ function UsuarioPerfil() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         if (novaSenha !== confirmarSenha) {
             setMensagemErro('As senhas não coincidem.');
+            setMensagemSucesso(''); // Garante que a mensagem de sucesso seja apagada
             return;
         }
-
+    
         try {
-            // Enviar a solicitação de alteração de senha para o backend
-            const response = await axios.put('/usuario/alterar-senha', {
+            const response = await api.put('/usuario/alterar-senha/new', {
                 senhaAtual,
                 novaSenha
             });
-
-            setMensagemSucesso('Senha alterada com sucesso!');
+    
+            setMensagemSucesso(response.data.message); // Usa a mensagem do backend
             setMensagemErro('');
+    
+            setSenhaAtual('');
+            setNovaSenha('');
+            setConfirmarSenha('');
         } catch (error) {
-            setMensagemErro('Erro ao alterar a senha.');
-            setMensagemSucesso('');
+            setMensagemSucesso(''); // Garante que a mensagem de sucesso seja apagada antes de exibir erro
+    
+            if (error.response && error.response.data) {
+                setMensagemErro(error.response.data.message); // Usa a mensagem do backend no erro
+            } else {
+                setMensagemErro('Erro ao alterar a senha.');
+            }
         }
     };
+    
 
     return (
         <>
@@ -50,9 +60,10 @@ function UsuarioPerfil() {
                                 <input
                                     type="text"
                                     className='form-control input-clean'
-                                    id="nome"
-                                    name="nome"
-                                    placeholder=""
+                                    onChange={(e) => setSenhaAtual(e.target.value)}
+                                    id="senhaAtual"
+                                    name="senhaAtual"
+                                    value={senhaAtual}
                                 />
                             </div>
 
@@ -61,9 +72,10 @@ function UsuarioPerfil() {
                                 <input
                                     type="text"
                                     className='form-control input-clean'
-                                    id="nome"
-                                    name="nome"
-                                    placeholder=""
+                                    value={novaSenha}
+                                    onChange={(e) => setNovaSenha(e.target.value)}
+                                    id="novaSenha"
+                                    name="novaSenha"
                                 />
                             </div>
 
@@ -72,8 +84,10 @@ function UsuarioPerfil() {
                                 <input
                                     type="text"
                                     className='form-control input-clean'
-                                    id="nome"
-                                    name="nome"
+                                    value={confirmarSenha}
+                                    onChange={(e) => setConfirmarSenha(e.target.value)}
+                                    id="confirmarSenha"
+                                    name="confirmarSenha"
                                     placeholder=""
                                 />
                             </div>

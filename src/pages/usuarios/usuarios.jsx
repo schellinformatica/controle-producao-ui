@@ -12,7 +12,7 @@ function Usuarios() {
     const [selectedUser, setSelectedUser] = useState(null);
 
     function ClickEdit(id) {
-        navigate("/usuarios/edit/" + id);
+        navigate("/usuario/edit/" + id);
     }
 
     function confirmDelete(user) {
@@ -74,7 +74,7 @@ function Usuarios() {
                     </nav>
 
                     <div>
-                        <Link to="/usuarios/add" className="btn btn-primary btn-clean mt-3 btn-default-formatted">
+                        <Link to="/usuario/add" className="btn btn-primary btn-clean mt-3 btn-default-formatted">
                             Novo usuário
                         </Link>
                     </div>

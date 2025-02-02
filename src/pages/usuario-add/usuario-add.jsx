@@ -72,7 +72,7 @@ function UsuarioAdd() {
             if (response.data) {
                 // Após salvar, desativa o loader e redireciona
                 setLoading(false);
-                navigate("/usuarios");
+                navigate("/usuario");
             }
         } catch (error) {
             // Se erro ocorrer, desativa o loader
