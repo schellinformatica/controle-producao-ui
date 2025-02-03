@@ -28,6 +28,7 @@ const BeneficiamentoEdit = () => {
   const [step, setStep] = useState(1);
   const [turnos, setTurnos] = useState([]); // Estado para armazenar os turnos
   const [maquinas, setMaquinas] = useState([]); // Estado para armazenar as máquinas
+  const [operador, setOperador] = useState("");
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -43,6 +44,15 @@ const BeneficiamentoEdit = () => {
       ...prev,
       data: dataAtual,
     }));
+
+
+    const operadorId = localStorage.getItem("sessionId");
+
+    // Se o operadorId existir, defina no estado
+    if (operadorId) {
+      setOperador(operadorId);
+    }
+
   }, [location.search]);
 
   const carregarBeneficiamento = async () => {
@@ -147,10 +157,10 @@ const BeneficiamentoEdit = () => {
 
     try {
       await api.delete(`/beneficiamento_item/${horaRemovida.id}`);
-      alert('Horário removido com sucesso');
+      // alert('Horário removido com sucesso');
     } catch (error) {
       console.error('Erro ao remover horário:', error);
-      alert('Erro ao remover horário.');
+      // alert('Erro ao remover horário.');
     }
   };
 
@@ -159,7 +169,8 @@ const BeneficiamentoEdit = () => {
       const json = {
         data: new Date(beneficiamento.data).toISOString(), // Converte para ISO-8601
         turno_id: Number(beneficiamento.turno_id),
-        usuario_id: Number(beneficiamento.usuario_id)
+        //usuario_id: Number(beneficiamento.usuario_id) operador
+        usuario_id: Number(operador)
       };
 
       const response = await api.post("/beneficiamento", json);
@@ -224,8 +235,8 @@ const BeneficiamentoEdit = () => {
                       type="number"
                       name="usuario_id"
                       className="form-control input-clean"
-                      onChange={handleChange}
-                      value={beneficiamento.usuario_id}
+                      value={operador}
+                      readOnly
                     />
                   </div>
 

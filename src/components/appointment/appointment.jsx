@@ -28,7 +28,7 @@ function Appointment(props) {
             <td className="text-end d-flex justify-content-end" onClick={stopPropagation}>
                 
                 <button
-                    onClick={(e) => { stopPropagation(e); props.ClickViewHours(props.id); }}
+                    onClick={(e) => { stopPropagation(e); props.ClickViewParadas(props.id); }}
                     className="btn btn-sm btn-outline-secondary btn-clean me-2">
                     <i className="bi bi-view-list"></i>
                 </button>

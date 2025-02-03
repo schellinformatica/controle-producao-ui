@@ -9,6 +9,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
 import ptBR from "date-fns/locale/pt-BR";
 import * as XLSX from "xlsx"; // Importando a biblioteca xlsx
+import ModalParadas from "../../components/modal/ModalParadas.jsx";
 
 registerLocale("pt-BR", ptBR);
 
@@ -23,6 +24,20 @@ function Appointments() {
     const [reason, setReason] = useState("");
 
     const [showModalExclusao, setShowModalExclusao] = useState(false);
+
+    const [paradas, setParadas] = useState([]);
+    const [showModalParadas, setShowModalParadas] = useState(false);
+
+    const handleViewParadas = async (producaoId) => {
+        try {
+            const response = await api.get(`/production/${producaoId}/paradas`);
+            const data = response.data;
+            setParadas(data);
+            setShowModalParadas(true);
+        } catch (error) {
+            console.error("Erro ao buscar paradas:", error);
+        }
+    };
 
     async function LoadAppointments() {
         try {
@@ -108,78 +123,62 @@ function Appointments() {
     }    
 
     function exportToExcel() {
-        const totalRegistros = appointments.length;
     
-        const totalPesoEmbalagem = appointments.reduce((acc, mq) => acc + (mq.peso_embalagem || 0), 0);
-        const totalQuantidade = appointments.reduce((acc, mq) => acc + (mq.quantidade || 0), 0);
-        const mediaPesoPacotes = totalQuantidade > 0 ? (totalPesoEmbalagem / totalQuantidade).toFixed(3) : 0;
-    
-        const totalizador = {
-            Máquina: "Total",
-            Data: "",
-            Lote: "",
-            Lote_Interno: "",
-            Marca: "",
-            Perca: appointments.reduce((acc, mq) => acc + (mq.perca || 0), 0),
-            Peso_B1: appointments.reduce((acc, mq) => acc + (mq.peso_b1 || 0), 0),
-            Peso_B2: appointments.reduce((acc, mq) => acc + (mq.peso_b2 || 0), 0),
-            Peso_B3: appointments.reduce((acc, mq) => acc + (mq.peso_b3 || 0), 0),
-            Peso_B4: appointments.reduce((acc, mq) => acc + (mq.peso_b4 || 0), 0),
-            Peso_B5: appointments.reduce((acc, mq) => acc + (mq.peso_b5 || 0), 0),
-            Peso_Embalagem: totalPesoEmbalagem,
-            Quantidade: totalQuantidade,
-            Teste_Impacto: "",
-            Verificado: ""
-        };
-    
-        const mediaizador = {
-            Máquina: "Média",
-            Data: "",
-            Lote: "",
-            Lote_Interno: "",
-            Marca: "",
-            Perca: (totalizador.Perca / totalRegistros).toFixed(3),
-            Peso_B1: (totalizador.Peso_B1 / totalRegistros).toFixed(3),
-            Peso_B2: (totalizador.Peso_B2 / totalRegistros).toFixed(3),
-            Peso_B3: (totalizador.Peso_B3 / totalRegistros).toFixed(3),
-            Peso_B4: (totalizador.Peso_B4 / totalRegistros).toFixed(3),
-            Peso_B5: (totalizador.Peso_B5 / totalRegistros).toFixed(3),
-            Peso_Embalagem: (totalPesoEmbalagem / totalRegistros).toFixed(3),
-            Quantidade: (totalQuantidade / totalRegistros).toFixed(3),
-            Média_Peso_Pacote: mediaPesoPacotes, // Adiciona a média correta dos pacotes
-            Teste_Impacto: "",
-            Verificado: ""
-        };
-    
-        // Criar a planilha com os dados
-        const data = appointments.map(mq => ({
-            Máquina: mq.maquina.nome,
-            Data: mq.hora,
-            Lote: mq.lote,
-            Lote_Interno: mq.lote_interno,
-            Marca: mq.marca,
-            Perca: mq.perca,
-            Peso_B1: mq.peso_b1,
-            Peso_B2: mq.peso_b2,
-            Peso_B3: mq.peso_b3,
-            Peso_B4: mq.peso_b4,
-            Peso_B5: mq.peso_b5,
-            Peso_Embalagem: mq.peso_embalagem,
-            Quantidade: mq.quantidade,
-            Teste_Impacto: mq.teste_impacto,
-            Verificado: mq.verificado
+        let totalProducaoGeral = 0;
+        const totalPorMarca = {};
+
+        const dadosExcel = appointments.map((apt) => {
+            const quantidade = Number(apt.quantidade);
+            totalProducaoGeral += quantidade;
+
+            if (!totalPorMarca[apt.marca]) {
+                totalPorMarca[apt.marca] = 0;
+            }
+            totalPorMarca[apt.marca] += quantidade;
+
+            // Calcula a média dos pesos B1 até B5
+            const pesos = [apt.peso_b1, apt.peso_b2, apt.peso_b3, apt.peso_b4, apt.peso_b5]
+                .map(p => Number(p) || 0); // Garante que valores nulos ou undefined não causem erro
+            const mediaPesos = pesos.reduce((acc, val) => acc + val, 0) / pesos.length;
+
+            // Corrige o horário adicionando 3 horas (caso esteja UTC e precise converter para o fuso local)
+            const horaAjustada = new Date(apt.hora);
+            horaAjustada.setHours(horaAjustada.getHours() + 3); // Ajuste de fuso horário
+
+            return {
+                "Máquina": apt.maquina?.nome || "N/A",
+                "Data": horaAjustada.toLocaleString(), // Exibir no formato correto
+                "Lote": apt.lote,
+                "Marca": apt.marca,
+                "Quantidade": quantidade,
+                "Média Pesos (B1-B5)": mediaPesos.toFixed(2), // 3 casas decimais
+            };
+        });
+
+        // Adiciona os totalizadores na planilha
+        dadosExcel.push({});
+        dadosExcel.push({ "Marca": "Total Geral", "Quantidade": totalProducaoGeral });
+
+        dadosExcel.push({});
+        dadosExcel.push({ "Marca": "Total por Marca" });
+
+        Object.entries(totalPorMarca).forEach(([marca, total]) => {
+            dadosExcel.push({ "Marca": marca, "Quantidade": total });
+        });
+
+        // Criar a planilha e baixar o arquivo
+        const ws = XLSX.utils.json_to_sheet(dadosExcel);
+
+        // Autofit: Ajusta automaticamente a largura das colunas
+        const colWidths = Object.keys(dadosExcel[0]).map((key) => ({
+            wch: Math.max(...dadosExcel.map(row => String(row[key] || "").length), key.length) + 2
         }));
-    
-        // Adicionar a linha de total e média ao final
-        data.push(totalizador);
-        data.push(mediaizador);
-    
-        const ws = XLSX.utils.json_to_sheet(data);
+        ws["!cols"] = colWidths;
+
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Empacotamento");
-    
-        // Salva o arquivo Excel
-        XLSX.writeFile(wb, "Empacotamento.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Empacotamentos");
+
+        XLSX.writeFile(wb, "Empacotamentos.xlsx");
     }    
 
     return (
@@ -260,6 +259,7 @@ function Appointments() {
                                             ClickParar={handleParar}
                                             ClickRetomar={handleRetomar}
                                             ClickEdit={ClickEdit}
+                                            ClickViewParadas={handleViewParadas}
                                         />
                                     ))
                                 }
@@ -336,6 +336,7 @@ function Appointments() {
                 </div>
             )}
 
+            <ModalParadas show={showModalParadas} onClose={() => setShowModalParadas(false)} paradas={paradas} />
 
             {/* Rodapé com espaçamento */}
             <footer className="mt-auto" style={{ padding: "50px 0", backgroundColor: "#f8f9fa", color: "#6c757d", textAlign: "center" }}>
