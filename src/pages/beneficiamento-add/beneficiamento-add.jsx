@@ -116,12 +116,17 @@ const BeneficiamentoEdit = () => {
   const adicionarHora = async () => {
     if (!horaInput.hora) return alert('Informe a hora.');
 
-    const [hours, minutes] = horaInput.hora.split(':');
-    const horaFormatada = new Date();
-    horaFormatada.setHours(hours, minutes, 0, 0);  // Configura a hora e minuto, ignorando a data
+    const [hours, minutes] = horaInput.hora.split(':').map(Number);
+    const now = new Date();
+    
+    // Criando um objeto Date com a hora correta no fuso horário local
+    const horaFormatada = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+
+    // Ajustando para manter o fuso horário local na conversão ISO-8601
+    const horaISO = new Date(horaFormatada.getTime() - horaFormatada.getTimezoneOffset() * 60000).toISOString();
 
     const novoBeneficiamentoItem = {
-      hora: horaFormatada.toISOString(), // Converte para ISO-8601
+      hora: horaISO, // Agora está no formato correto sem adicionar horas extras
       maquina_id_1: Number(horaInput.producao_brunidor_1),
       maquina_id_2: Number(horaInput.producao_polidor_2),
       tonelada_hora: Number(horaInput.tonelada_hora),
@@ -147,6 +152,7 @@ const BeneficiamentoEdit = () => {
     }
   };
 
+
   const removerHora = async (index) => {
     const horaRemovida = beneficiamento.beneficiamentos_itens[index];
 
@@ -166,10 +172,13 @@ const BeneficiamentoEdit = () => {
 
   const salvarBeneficiamento = async () => {
     try {
+
+      const now = new Date();
+      const localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString();
+
       const json = {
-        data: new Date(beneficiamento.data).toISOString(), // Converte para ISO-8601
+        data: localISO,
         turno_id: Number(beneficiamento.turno_id),
-        //usuario_id: Number(beneficiamento.usuario_id) operador
         usuario_id: Number(operador)
       };
 
@@ -338,7 +347,7 @@ const BeneficiamentoEdit = () => {
                         name="classificacao_3_4"
                         className="form-control input-clean"
                         placeholder="Classificação do 3/4"
-                        // value={horaInput.tonelada_hora}
+                        value={horaInput.classificacao_3_4}
                         onChange={handleHoraChange}
                       />
                     </div>
@@ -370,11 +379,17 @@ const BeneficiamentoEdit = () => {
                       {beneficiamento.beneficiamentos_itens && beneficiamento.beneficiamentos_itens.length > 0 ? (
                         beneficiamento.beneficiamentos_itens.map((item, index) => (
                           <tr key={index}>
-                            <td className="text-center">{new Date(item.hora).toLocaleTimeString()}</td>
+                            <td className="text-center">
+                            {new Date(new Date(item.hora).getTime() + 3 * 60 * 60 * 1000).toLocaleTimeString('pt-BR', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit'
+                            })}
+                          </td>
                             <td className="text-center">{item.maquina_1.nome}</td> {/* item.maquina_1.nome */}
                             <td className="text-center">{item.maquina_2.nome}</td>
                             <td className="text-center">{item.tonelada_hora}</td>
-                            <td className="text-center">{item.tonelada_hora}</td>
+                            <td className="text-center">{item.classificacao_3_4}</td>
                             <td className="text-center align-middle">
                               <button
                                 type="button"

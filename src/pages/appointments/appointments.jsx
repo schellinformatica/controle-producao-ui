@@ -198,12 +198,14 @@ function Appointments() {
                             Novo empacotamento
                         </Link>
                         <button className="btn btn-outline-secondary btn-clean mt-3 ms-3" onClick={exportToExcel}>
-                            <i class="bi bi-file-earmark-excel-fill"></i>
+                            <i className="bi bi-file-earmark-excel-fill"></i>
                         </button>
                         
                         <div className="d-flex align-items-center ms-auto mt-3">
-                            <label className="me-2"></label>
+                            <label htmlFor="data-inicio" className="me-2"></label>
                             <DatePicker
+                                id="data-inicio"
+                                name="data-inicio"
                                 selected={startDate}
                                 onChange={(date) => setStartDate(date)}
                                 className="form-control input-clean input-datetime-filter"
@@ -211,8 +213,9 @@ function Appointments() {
                                 locale="pt-BR"
                                 placeholderText="Data Início"
                             />
-                            <label className="ms-2 me-2"></label>
+                            <label htmlFor="data-fim" className="ms-2 me-2"></label>
                             <DatePicker
+                                id="data-fim"
                                 selected={endDate}
                                 onChange={(date) => setEndDate(date)}
                                 className="form-control input-clean input-datetime-filter"
@@ -220,8 +223,6 @@ function Appointments() {
                                 locale="pt-BR"
                                 placeholderText="Data Fim"
                             />
-
-
 
                             <button className="btn btn-outline-secondary btn-clean ms-3" onClick={handleFilterChange}>
                                 <i className="bi bi-filter"></i>
@@ -286,6 +287,7 @@ function Appointments() {
                                         <label htmlFor="motivo">Motivo</label>
                                         <textarea
                                             id="motivo"
+                                            name="motivo"
                                             className="form-control"
                                             rows="3"
                                             value={reason}

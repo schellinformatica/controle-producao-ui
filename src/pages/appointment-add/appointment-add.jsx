@@ -294,11 +294,14 @@ function AppointmentAdd() {
             perca: perca,
             teste_impacto: testeImpacto,
             verificado: verificado,
-            hora: localISO,
+            // hora: localISO,
             turno_id: id_turno,
             usuario_id: parseInt(usuario_id, 10),
             usuario_verificador_id: verificado ? parseInt(usuarioSelecionado, 10) : null,
         };
+
+        if (!id > 0)
+            json.hora = localISO;
 
         try { 
             const response = id > 0
@@ -481,7 +484,13 @@ function AppointmentAdd() {
                         {/* Exibir a média calculada */}
                         <div className="mb-3">
                             <label className="form-label">Média dos Pesos:</label>
-                            <input type="text" value={calcularMedia()} className="form-control input-clean" readOnly disabled />
+                            <input type="text" 
+                            value={calcularMedia()} 
+                            className="form-control input-clean" 
+                            id="media-pesos"
+                            name="media-pesos"
+                            readOnly 
+                            disabled />
                         </div>
 
                         <div className="mb-3">
