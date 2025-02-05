@@ -13,6 +13,8 @@ import BeneficiamentoAdd from "./pages/beneficiamento-add/beneficiamento-add.jsx
 import Usuarios from "./pages/usuarios/usuarios.jsx";
 import UsuariosAdd from "./pages/usuario-add/usuario-add.jsx";
 import UsuarioPerfil from "./pages/usuario-perfil/usuario-perfil.jsx";
+import MaquinasManutencao from "./pages/maquinas-manutencao/maquinas-manutencao.jsx";
+import MaquinasManutencaoAdd from "./pages/maquina-manutencao-add/maquina-manutencao-add.jsx";
 
 function Rotas() {
     return <BrowserRouter>
@@ -27,7 +29,7 @@ function Rotas() {
             <Route path="/maquinas" element={<Maquinas />} />
             <Route path="/maquinas/add" element={<MaquinaAdd />} />
             <Route path="/maquinas/edit/:id" element={<MaquinaAdd />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            {/*<Route path="/dashboard" element={<Dashboard />} /> */}
             <Route path="/beneficiamentos" element={<Beneficiamentos />} />
             <Route path="/beneficiamentos/add" element={<BeneficiamentoAdd />} />
             <Route path="/beneficiamentos/edit/:id" element={<BeneficiamentoAdd />} />
@@ -35,7 +37,9 @@ function Rotas() {
             <Route path="/usuario/add" element={<UsuariosAdd />} />
             <Route path="/usuario/edit/:id" element={<UsuariosAdd />} />
             <Route path="/usuario-perfil" element={<UsuarioPerfil />} />
-            <Route path="*" element={<Navigate to="/dashboard" />} />
+            <Route path="/maquinas-manutencao" element={<MaquinasManutencao />} />
+            <Route path="/maquinas-manutencao/add" element={<MaquinasManutencaoAdd />} />
+            <Route path="*" element={<Navigate to="/appointments" />} />
         </Routes>
     </BrowserRouter>
 }

@@ -31,9 +31,6 @@ function NavBar() {
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
                         <li className="nav-item">
-                            <Link className="nav-link active" to="/dashboard">Dashboard</Link>
-                        </li>
-                        <li className="nav-item">
                             <Link className="nav-link" to="/beneficiamentos">Beneficiamentos</Link>
                         </li>
                         <li className="nav-item">
@@ -41,6 +38,9 @@ function NavBar() {
                         </li>
                         <li className="nav-item">
                             <Link className="nav-link" to="/maquinas">Máquinas</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className="nav-link" to="/maquinas-manutencao">Manutenções</Link>
                         </li>
                         <li className="nav-item">
                             <Link className="nav-link" to="/usuario">Usuários</Link>
