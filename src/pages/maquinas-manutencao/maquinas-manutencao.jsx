@@ -158,13 +158,12 @@ function MaquinasManutencao() {
                                                 <tr key={index}>
                                                     <td>{new Date(item.data).toLocaleDateString()}</td>
                                                     <td>{new Date(item.data_proxima_manutencao).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</td>
-
                                                     <td>{item.descricao}</td>
                                                 </tr>
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="2" className="text-center">Nenhuma manutenção registrada.</td>
+                                                <td colSpan="3" className="text-center">Nenhuma manutenção registrada.</td>
                                             </tr>
                                         )}
                                     </tbody>
