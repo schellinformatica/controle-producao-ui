@@ -19,8 +19,8 @@ const BeneficiamentoEdit = () => {
 
   const [horaInput, setHoraInput] = useState({
     hora: '',
-    producao_brunidor_1: '',
-    producao_polidor_2: '',
+    maquina_1_valor: '',
+    maquina_2_valor: '',
     tonelada_hora: '',
     classificacao_3_4: '',
   });
@@ -29,6 +29,7 @@ const BeneficiamentoEdit = () => {
   const [turnos, setTurnos] = useState([]); // Estado para armazenar os turnos
   const [maquinas, setMaquinas] = useState([]); // Estado para armazenar as máquinas
   const [operador, setOperador] = useState("");
+  const [operadorNome, setOperadorNome] = useState("");
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -51,6 +52,7 @@ const BeneficiamentoEdit = () => {
     // Se o operadorId existir, defina no estado
     if (operadorId) {
       setOperador(operadorId);
+      setOperadorNome( localStorage.getItem("sessionName") ) ;
     }
 
   }, [location.search]);
@@ -127,8 +129,8 @@ const BeneficiamentoEdit = () => {
 
     const novoBeneficiamentoItem = {
       hora: horaISO, // Agora está no formato correto sem adicionar horas extras
-      maquina_id_1: Number(horaInput.producao_brunidor_1),
-      maquina_id_2: Number(horaInput.producao_polidor_2),
+      maquina_1_valor: Number(horaInput.maquina_1_valor),
+      maquina_2_valor: Number(horaInput.maquina_2_valor),
       tonelada_hora: Number(horaInput.tonelada_hora),
       classificacao_3_4: Number(horaInput.classificacao_3_4),
       beneficiamento_id: beneficiamento.id,
@@ -141,8 +143,8 @@ const BeneficiamentoEdit = () => {
 
       setHoraInput({
         hora: '',
-        producao_brunidor_1: '',
-        producao_polidor_2: '',
+        maquina_1_valor: '',
+        maquina_2_valor: '',
         tonelada_hora: '',
         classificacao_3_4: '',
       });
@@ -196,18 +198,18 @@ const BeneficiamentoEdit = () => {
       <NavBar />
       <div className="content-wrapper">
         <div className="container-custom mt-2">
-          <nav aria-label="breadcrumb">
-            <ol className="breadcrumb">
+            <nav aria-label="breadcrumb">
+                <ol className="breadcrumb">
               <li className="breadcrumb-item"><Link to="/dashboard">Dashboard</Link></li>
               <li className="breadcrumb-item"><Link to="/beneficiamentos">Beneficiamento</Link></li>
-              <li className="breadcrumb-item active" aria-current="page">
-                {step === 1 ? 'Novo' : 'Editar'}
-              </li>
-            </ol>
-          </nav>
-
-          <div className="mt-4">
-            <form className="row g-3">
+                    <li className="breadcrumb-item active" aria-current="page">
+                      {step === 1 ? 'Novo' : 'Editar'}
+                    </li>
+                </ol>
+            </nav>
+        
+            <div className="mt-4">
+              <form className="row g-3">
               {step === 1 && (
                 <>
                   <div className="col-md-4">
@@ -241,12 +243,12 @@ const BeneficiamentoEdit = () => {
                   <div className="col-md-4">
                     <label className="form-label">Operador</label>
                     <input
-                      type="number"
-                      name="usuario_id"
+                      type="text"
                       className="form-control input-clean"
-                      value={operador}
+                      value={operadorNome}
                       readOnly
                     />
+                    <input type="hidden" name="usuario_id" value={operador} />
                   </div>
 
                   <div className="d-flex justify-content-between mt-4">
@@ -260,7 +262,7 @@ const BeneficiamentoEdit = () => {
                 </>
               )}
 
-              {step === 2 && (
+            {step === 2 && (
                 <>
                   <h5 className="mt-4">Adicionar Horários</h5>
                   <div className="row g-3 mt-1">
@@ -275,60 +277,26 @@ const BeneficiamentoEdit = () => {
                     </div>
 
                     <div className="col-md-2">
-                      <select
-                        name="producao_brunidor_1"
-                        className="form-select input-clean"
-                        value={horaInput.producao_brunidor_1}
-                        onChange={handleHoraChange}
-                      >
-                        <option value="" disabled hidden>Máquina 1</option>
-                        {maquinas.map((maquina) => (
-                          <option key={maquina.id} value={maquina.id}>
-                            {maquina.nome}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/*
-                    <div className="col-md-2">
                       <input
                         type="number"
-                        name="producao_brunidor_1"
+                        name="maquina_1_valor"
                         className="form-control input-clean"
                         placeholder="Máquina 1"
-                        value={horaInput.producao_brunidor_1}
+                        value={horaInput.maquina_1_valor}
                         onChange={handleHoraChange}
                       />
-                    </div>*/}
-
-                    <div className="col-md-2">
-                      <select
-                        name="producao_polidor_2"
-                        className="form-select input-clean"
-                        value={horaInput.producao_polidor_2}
-                        onChange={handleHoraChange}
-                      >
-                        <option value="" disabled hidden>Máquina 2</option>
-                        {maquinas.map((maquina) => (
-                          <option key={maquina.id} value={maquina.id}>
-                            {maquina.nome}
-                          </option>
-                        ))}
-                      </select>
                     </div>
-                    
-                    {/*
+
                     <div className="col-md-2">
                       <input
                         type="number"
-                        name="producao_polidor_2"
+                        name="maquina_2_valor"
                         className="form-control input-clean"
                         placeholder="Máquina 2"
-                        value={horaInput.producao_polidor_2}
+                        value={horaInput.maquina_2_valor}
                         onChange={handleHoraChange}
                       />
-                    </div> */}
+                    </div>
 
                     <div className="col-md-2">
                       <input
@@ -386,8 +354,8 @@ const BeneficiamentoEdit = () => {
                               second: '2-digit'
                             })}
                           </td>
-                            <td className="text-center">{item.maquina_1.nome}</td> {/* item.maquina_1.nome */}
-                            <td className="text-center">{item.maquina_2.nome}</td>
+                            <td className="text-center">{item.maquina_1_valor}</td> {/* item.maquina_1.nome */}
+                            <td className="text-center">{item.maquina_2_valor}</td>
                             <td className="text-center">{item.tonelada_hora}</td>
                             <td className="text-center">{item.classificacao_3_4}</td>
                             <td className="text-center align-middle">
@@ -411,12 +379,16 @@ const BeneficiamentoEdit = () => {
 
                 </>
               )}
-            </form>
+
+              </form>
+
+
+            </div>
           </div>
         </div>
       </div>
-    </div>
+   
   );
-};
+}
 
 export default BeneficiamentoEdit;

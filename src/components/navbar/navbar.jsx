@@ -37,6 +37,9 @@ function NavBar() {
                             <Link className="nav-link" to="/appointments">Empacotamento</Link>
                         </li>
                         <li className="nav-item">
+                            <Link className="nav-link" to="/produtos">Produtos</Link>
+                        </li>
+                        <li className="nav-item">
                             <Link className="nav-link" to="/maquinas">Máquinas</Link>
                         </li>
                         <li className="nav-item">

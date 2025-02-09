@@ -67,12 +67,12 @@ function Beneficiamentos() {
             <NavBar />
             <div className="content-wrapper">
                 <div className="container-custom mt-2">
-                    <nav aria-label="breadcrumb">
-                        <ol className="breadcrumb">
-                            <li className="breadcrumb-item"><Link to="/">Dashboard</Link></li>
-                            <li className="breadcrumb-item active" aria-current="page">Beneficiamento</li>
-                        </ol>
-                    </nav>
+                        <nav aria-label="breadcrumb">
+                            <ol className="breadcrumb">
+                                <li className="breadcrumb-item"><Link to="/">Dashboard</Link></li>
+                                <li className="breadcrumb-item active" aria-current="page">Beneficiamento</li>
+                            </ol>
+                        </nav>
 
                     <div>
                         <Link to="/beneficiamentos/add" className="btn btn-primary btn-clean mt-3">
@@ -118,7 +118,7 @@ function Beneficiamentos() {
                                 <h5 className="modal-title">Atenção</h5>
                                 <button type="button" className="btn-close" onClick={() => setShowModalExclusao(false)}></button>
                             </div>
-   
+
                             <div className="modal-body text-center">
                                 <p style={{ wordBreak: "break-word", overflowWrap: "break-word", fontSize: "1rem" }}>
                                     Você está prestes a excluir o beneficiamento{" "} 

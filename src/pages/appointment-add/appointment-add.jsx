@@ -11,6 +11,7 @@ function AppointmentAdd() {
 
     const [maquinas, setMaquinas] = useState([]);
     const [turnos, setTurnos] = useState([]);
+    const [produtos, setProdutos] = useState([]);
 
     const [time, setTime] = useState("12:00");
 
@@ -18,6 +19,7 @@ function AppointmentAdd() {
     const { id } = useParams();
     const [id_maquina, setIdMaquina] = useState(0);
     const [id_turno, setIdTurno] = useState("");
+    const [id_produto, setIdProduto] = useState("");
     const [lote, setLote] = useState("");
     const [loteInterno, setLoteInterno] = useState("");
     const [pesoB1, setPesoB1] = useState("");
@@ -33,9 +35,11 @@ function AppointmentAdd() {
     const [testeImpacto, setTesteImpacto] = useState(false);
     const [verificado, setVerificado] = useState(false);
     const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
+    const [verificacaoCarimbo, setVerificacaoCarimbo] = useState(false);
     
     /* inputs error */
     const [errorTurno, setErrorTurno] = useState("");
+    const [errorProduto, setErrorProduto] = useState("");
     const [errorMaquina, setErrorMaquina] = useState("");
     const [loteError, setLoteError] = useState("");
     const [loteInternoError, setLoteInternoError] = useState("");
@@ -69,6 +73,7 @@ function AppointmentAdd() {
     const embalagemUtilizadaRef = useRef(null);
     const percaRef = useRef(null);
     const turnoRef = useRef(null);
+    const produtoRef = useRef(null);
      
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -147,6 +152,26 @@ function AppointmentAdd() {
         }
     }
 
+    async function LoadProdutos() {
+        try {
+            const response = await api.get("/produto");
+
+            if (response.data) {
+                setProdutos(response.data);
+            }
+
+        } catch (error) {
+            if (error.response?.data.error) {
+                if (error.response.status == 401)
+                    return navigate("/");
+
+                alert(error.response?.data.error);
+            }
+            else
+                alert("Erro ao listar os produtos.");
+        }
+    }
+
     async function LoadAppointment(id) {
 
         try {
@@ -155,6 +180,7 @@ function AppointmentAdd() {
             if (response.data) {
                 if (response.data) {
                     setIdTurno(response.data.turno_id);
+                    setIdProduto(response.data.produto_id);
                     setIdMaquina(response.data.maquina_id);
                     setLote(response.data.lote);
                     setLoteInterno(response.data.lote_interno);
@@ -180,6 +206,7 @@ function AppointmentAdd() {
                     setTesteImpacto(response.data.teste_impacto);
                     setVerificado(response.data.verificado);
                     setUsuarioSelecionado(response.data.usuario_verificador_id);
+                    setVerificacaoCarimbo(response.data.verificacao_carimbo);
                 }
             }
         } catch (error) {
@@ -203,6 +230,14 @@ function AppointmentAdd() {
             hasError = true;
         } else {
             setErrorTurno("");
+        }
+
+        if (id_turno === "" || id_turno === 0) {
+            setErrorProduto("Produto é obrigatório.");
+            if (!hasError) produtoRef.current?.focus();
+            hasError = true;
+        } else {
+            setErrorProduto("");
         }
         
         if (id_maquina === "" || id_maquina === 0) {
@@ -280,6 +315,7 @@ function AppointmentAdd() {
         
         const json = {
             maquina_id: id_maquina,
+            produto_id: id_produto,
             lote: lote,
             lote_interno: loteInterno,
             peso_b1: pesos.pesoB1,
@@ -298,6 +334,7 @@ function AppointmentAdd() {
             turno_id: id_turno,
             usuario_id: parseInt(usuario_id, 10),
             usuario_verificador_id: verificado ? parseInt(usuarioSelecionado, 10) : null,
+            verificacao_carimbo: verificacaoCarimbo,
         };
 
         if (!id > 0)
@@ -322,13 +359,13 @@ function AppointmentAdd() {
             .map(v => parseFloat(v.replace(",", "."))) // Converter para número e substituir vírgula por ponto
             .filter(v => !isNaN(v)); // Remover valores inválidos
     
-        return valores.length ? (valores.reduce((a, b) => a + b, 0) / valores.length).toFixed(2) : "0.00";
+        return valores.length ? (valores.reduce((a, b) => a + b, 0) / valores.length).toFixed(3) : "0.000";
     };
 
     useEffect(() => {
         LoadMaquinas();
         LoadTurnos();
-
+        LoadProdutos();
         LoadUsuarios();
     }, []);
 
@@ -363,6 +400,28 @@ function AppointmentAdd() {
                             </select>
                             {errorTurno && <div className="invalid-feedback mt-2">{errorTurno}</div>}
                         </div>
+
+                        <div className="mb-3">
+                            <label htmlFor="turno" className="form-label">Produto</label>
+                            <select
+                                ref={produtoRef}
+                                name="produto" 
+                                id="produto" 
+                                className={`form-select input-clean ${errorTurno ? 'is-invalid' : ''}`}
+                                value={id_produto}
+                                onChange={(e) => {
+                                    setIdProduto(parseInt(e.target.value, 10));
+                                    if (e.target.value !== "0") setErrorProduto(""); // Limpa o erro se houver um valor válido
+                                }}
+                            >
+                                <option value="">Selecione o Produto</option>
+                                {produtos.map(t => (
+                                    <option key={t.id} value={t.id}>{t.nome}</option>
+                                ))}
+                            </select>
+                            {errorProduto && <div className="invalid-feedback mt-2">{errorProduto}</div>}
+                        </div>
+
 
                         <div className="mb-3">
                             <label htmlFor="maquina" className="form-label">Máquina</label>
@@ -422,7 +481,7 @@ function AppointmentAdd() {
                         </div>
                                 
                         <div className="mb-3">
-                            <label className="form-label">Peso B1</label>
+                            <label className="form-label">P1</label>
                             <input
                                 value={pesos.pesoB1}
                                 type="text"
@@ -434,7 +493,7 @@ function AppointmentAdd() {
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label">Peso B2</label>
+                            <label className="form-label">P2</label>
                             <input
                                 value={pesos.pesoB2}
                                 type="text"
@@ -446,7 +505,7 @@ function AppointmentAdd() {
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label">Peso B.3</label>
+                            <label className="form-label">P3</label>
                             <input 
                                 value={pesos.pesoB3}
                                 type="text"
@@ -458,7 +517,7 @@ function AppointmentAdd() {
                         </div>
                         
                         <div className="mb-3">
-                            <label className="form-label">Peso B.4</label>
+                            <label className="form-label">P4</label>
                             <input 
                                 value={pesos.pesoB4}
                                 type="text"
@@ -470,7 +529,7 @@ function AppointmentAdd() {
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label">Peso B.5</label>
+                            <label className="form-label">P5</label>
                             <input 
                                 value={pesos.pesoB5}
                                 type="text"
@@ -610,6 +669,23 @@ function AppointmentAdd() {
                                     onChange={(e) => setTesteImpacto(e.target.checked)}
                                 />
                                 <span className="mb-0">Realizado</span>
+                            </label>
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="d-block mb-2">Verificação do Carimbo</label>
+                            <label 
+                                className="border rounded p-3 d-flex align-items-center gap-3 cursor-pointer user-select-none w-100"
+                                htmlFor="verificacaoCarimbo"
+                            >
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    id="verificacaoCarimbo"
+                                    checked={verificacaoCarimbo}
+                                    onChange={(e) => setVerificacaoCarimbo(e.target.checked)}
+                                />
+                                <span className="mb-0">Verificado</span>
                             </label>
                         </div>
 

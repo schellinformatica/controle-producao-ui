@@ -17,6 +17,8 @@ const UsuariosAdd = lazy(() => import("./pages/usuario-add/usuario-add.jsx"));
 const UsuarioPerfil = lazy(() => import("./pages/usuario-perfil/usuario-perfil.jsx"));
 const MaquinasManutencao = lazy(() => import("./pages/maquinas-manutencao/maquinas-manutencao.jsx"));
 const MaquinasManutencaoAdd = lazy(() => import("./pages/maquina-manutencao-add/maquina-manutencao-add.jsx"));
+const Produtos = lazy(() => import("./pages/produtos/produtos.jsx"));
+const ProdutoAdd = lazy(() => import("./pages/produto-add/produto-add.jsx"));
 
 // Componente de Spinner
 const Spinner = () => (
@@ -66,6 +68,9 @@ function Rotas() {
                     <Route path="/usuario-perfil" element={<UsuarioPerfil />} />
                     <Route path="/maquinas-manutencao" element={<MaquinasManutencao />} />
                     <Route path="/maquinas-manutencao/add" element={<MaquinasManutencaoAdd />} />
+                    <Route path="/produtos" element={<Produtos />} />
+                    <Route path="/produtos/add" element={<ProdutoAdd />} />
+                    <Route path="/produtos/edit/:id" element={<ProdutoAdd />} />
                     <Route path="*" element={<Navigate to="/appointments" />} />
                 </Routes>
             </Suspense>

@@ -151,7 +151,7 @@ function Appointments() {
                 "Lote": apt.lote,
                 "Marca": apt.marca,
                 "Quantidade": quantidade,
-                "Média Pesos (B1-B5)": mediaPesos.toFixed(2), // 3 casas decimais
+                "Média Pesos (B1-B5)": mediaPesos.toFixed(3), // 3 casas decimais
             };
         });
 
