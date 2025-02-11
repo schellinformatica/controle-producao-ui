@@ -22,6 +22,7 @@ function Login() {
                 localStorage.setItem("sessionId", response.data.id);
                 localStorage.setItem("sessionEmail", response.data.email);
                 localStorage.setItem("sessionName", response.data.nome);
+                localStorage.setItem("userRole", response.data.role_id);
                 api.defaults.headers.common["Authorization"] = "Bearer " + response.data.token;
                 navigate("/appointments");
             } else {

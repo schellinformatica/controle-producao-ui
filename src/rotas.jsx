@@ -45,6 +45,29 @@ const Spinner = () => (
     </div>
 );
 
+// Função de verificação de autenticação e autorização
+const PrivateRoute = ({ element, role }) => {
+    const sessionToken = localStorage.getItem("sessionToken");
+    const userRole = localStorage.getItem("userRole");
+
+    // Verifica se o token de sessão existe
+    if (!sessionToken) {
+        return <Navigate to="/" />;
+    }
+
+    // Verifica se o usuário tem a permissão necessária para acessar a página
+    if (role && userRole !== role) {
+        localStorage.removeItem("sessionToken");
+        localStorage.removeItem("sessionId");
+        localStorage.removeItem("sessionEmail");
+        localStorage.removeItem("sessionName");
+        localStorage.removeItem("userRole");
+        return <Navigate to="/" />;
+    }
+
+    return element;
+};
+
 function Rotas() {
     return (
         <BrowserRouter>
@@ -53,24 +76,32 @@ function Rotas() {
                     <Route path="/" element={<Login />} />
                     <Route path="/employee" element={<Employee />} />
                     <Route path="/employee/new" element={<EmployeeAdd />} />
+
                     <Route path="/appointments" element={<Appointments />} />
                     <Route path="/appointments/add" element={<AppointmentAdd />} />
                     <Route path="/appointments/edit/:id" element={<AppointmentAdd />} />
-                    <Route path="/maquinas" element={<Maquinas />} />
-                    <Route path="/maquinas/add" element={<MaquinaAdd />} />
-                    <Route path="/maquinas/edit/:id" element={<MaquinaAdd />} />
+
+                    <Route path="/maquinas" element={<PrivateRoute element={<Maquinas />} role="1" />} />
+                    <Route path="/maquinas/add" element={<PrivateRoute element={<MaquinaAdd />} role="1" />} />
+                    <Route path="/maquinas/edit/:id" element={<PrivateRoute element={<MaquinaAdd />} role="1" />} />
+
                     <Route path="/beneficiamentos" element={<Beneficiamentos />} />
                     <Route path="/beneficiamentos/add" element={<BeneficiamentoAdd />} />
                     <Route path="/beneficiamentos/edit/:id" element={<BeneficiamentoAdd />} />
-                    <Route path="/usuario" element={<Usuarios />} />
-                    <Route path="/usuario/add" element={<UsuariosAdd />} />
-                    <Route path="/usuario/edit/:id" element={<UsuariosAdd />} />
+                    
+                    <Route path="/usuario" element={<PrivateRoute element={<Usuarios />} role="1" />} />
+                    <Route path="/usuario/add" element={<PrivateRoute element={<UsuariosAdd />} role="1" />} />
+                    <Route path="/usuario/edit/:id" element={<PrivateRoute element={<UsuariosAdd />} role="1" />} />
+                    
                     <Route path="/usuario-perfil" element={<UsuarioPerfil />} />
+
                     <Route path="/maquinas-manutencao" element={<MaquinasManutencao />} />
                     <Route path="/maquinas-manutencao/add" element={<MaquinasManutencaoAdd />} />
-                    <Route path="/produtos" element={<Produtos />} />
-                    <Route path="/produtos/add" element={<ProdutoAdd />} />
-                    <Route path="/produtos/edit/:id" element={<ProdutoAdd />} />
+
+                    <Route path="/produtos" element={<PrivateRoute element={<Produtos />} role="1" />} />
+                    <Route path="/produtos/add" element={<PrivateRoute element={<ProdutoAdd />} role="1" />} />
+                    <Route path="/produtos/edit/:id" element={<PrivateRoute element={<ProdutoAdd />} role="1" />} />
+
                     <Route path="*" element={<Navigate to="/appointments" />} />
                 </Routes>
             </Suspense>

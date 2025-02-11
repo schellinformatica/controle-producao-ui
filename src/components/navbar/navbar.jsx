@@ -7,11 +7,14 @@ function NavBar() {
 
     const sessionName = localStorage.getItem("sessionName");
 
+    const userRole = localStorage.getItem("userRole");
+
     function Logout() {
         localStorage.removeItem("sessionToken");
         localStorage.removeItem("sessionId");
         localStorage.removeItem("sessionEmail");
         localStorage.removeItem("sessionName");
+        localStorage.removeItem("userRole");
 
         navigate("/");
         api.defaults.headers.common['Authorization'] = "";
@@ -36,18 +39,24 @@ function NavBar() {
                         <li className="nav-item">
                             <Link className="nav-link" to="/appointments">Empacotamento</Link>
                         </li>
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/produtos">Produtos</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/maquinas">Máquinas</Link>
-                        </li>
+                        {userRole === "1" && (
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/produtos">Produtos</Link>
+                            </li>
+                        )}
+                        {userRole === "1" && (
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/maquinas">Máquinas</Link>
+                            </li>
+                        )}
                         <li className="nav-item">
                             <Link className="nav-link" to="/maquinas-manutencao">Manutenções</Link>
                         </li>
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/usuario">Usuários</Link>
-                        </li>
+                        {userRole === "1" && ( //apenas admin pode visualizar e acessar
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/usuario">Usuários</Link>
+                            </li>
+                        )}
                     </ul>
 
                     <ul className="navbar-nav">

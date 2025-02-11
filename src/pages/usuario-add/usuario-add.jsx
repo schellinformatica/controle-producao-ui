@@ -14,9 +14,17 @@ function UsuarioAdd() {
 
     const [email, setEmail] = useState("");
     const [emailError, setEmailError] = useState("");
+
+    const [roleError, setRoleError] = useState("");
+
     const emailRef = useRef(null);
+    const roleRef = useRef(null);
 
     const [loading, setLoading] = useState(false); // Estado para o loader
+
+    const [roles, setRoles] = useState([]);
+
+    const [id_role, setIdRole] = useState("");
     
     async function LoadUsuario(id) {
         try {
@@ -24,6 +32,7 @@ function UsuarioAdd() {
             if (response.data) {
                 setNome(response.data.nome);
                 setEmail(response.data.email);
+                setIdRole(response.data.role_id);
             }
         } catch (error) {
             if (error.response?.data.error) {
@@ -35,12 +44,33 @@ function UsuarioAdd() {
         }
     }
 
+    async function LoadRoles() {
+        try {
+            const response = await api.get("/role");
+
+            if (response.data) {
+                setRoles(response.data);
+            }
+
+        } catch (error) {
+            if (error.response?.data.error) {
+                if (error.response.status == 401)
+                    return navigate("/");
+
+                alert(error.response?.data.error);
+            }
+            else
+                alert("Erro ao listar as permissões.");
+        }
+    }
+
     async function SaveUsuario() {
         let hasError = false;
 
         const fields = [
             { value: nome.trim(), error: nomeError, setError: setNomeError, ref: nomeRef, fieldName: 'Nome' },
             { value: email.trim(), error: emailError, setError: setEmailError, ref: emailRef, fieldName: 'Email' },
+            { value: email.trim(), error: roleError, setError: setRoleError, ref: emailRef, fieldName: 'Permissão' },
         ];
 
         // Itera sobre os campos e valida
@@ -59,7 +89,7 @@ function UsuarioAdd() {
 
         if (hasError) return;
 
-        const json = { nome, email };
+        const json = { nome, email, id_role };
 
         // Ativa o loader
         setLoading(true);
@@ -88,6 +118,7 @@ function UsuarioAdd() {
         if (nomeRef.current) {
             nomeRef.current.focus();
         }
+        LoadRoles();
     }, []);
 
     return (
@@ -137,6 +168,27 @@ function UsuarioAdd() {
                                 disabled={loading || id > 0} // Desabilita o campo durante o loading e ao editar
                             />
                             {emailError && <div className="invalid-feedback mt-2">{emailError}</div>}
+                        </div>
+
+                        <div className="mb-3">
+                            <label htmlFor="role" className="form-label">Permissão</label>
+                            <select
+                                ref={roleRef}
+                                name="role" 
+                                id="role"
+                                className={`form-select input-clean ${roleError ? 'is-invalid' : ''}`}
+                                value={id_role} 
+                                onChange={(e) => {
+                                    setIdRole(parseInt(e.target.value, 10));
+                                    if (e.target.value !== "0") setErrorRole("");
+                                }}
+                            >
+                                <option value="">Selecione a Permissão</option>
+                                {roles.map(t => (
+                                    <option key={t.id} value={t.id}>{t.nome}</option>
+                                ))}
+                            </select>
+                            {roleError && <div className="invalid-feedback mt-2">{roleError}</div>}
                         </div>
 
                         <button onClick={SaveUsuario} className="btn btn-primary btn-clean" type="button" disabled={loading}>
