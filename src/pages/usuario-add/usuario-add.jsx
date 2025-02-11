@@ -24,7 +24,7 @@ function UsuarioAdd() {
 
     const [roles, setRoles] = useState([]);
 
-    const [id_role, setIdRole] = useState("");
+    const [role_id, setRoleId] = useState("");
     
     async function LoadUsuario(id) {
         try {
@@ -32,7 +32,7 @@ function UsuarioAdd() {
             if (response.data) {
                 setNome(response.data.nome);
                 setEmail(response.data.email);
-                setIdRole(response.data.role_id);
+                setRoleId(response.data.role_id);
             }
         } catch (error) {
             if (error.response?.data.error) {
@@ -89,7 +89,7 @@ function UsuarioAdd() {
 
         if (hasError) return;
 
-        const json = { nome, email, id_role };
+        const json = { nome, email, role_id };
 
         // Ativa o loader
         setLoading(true);
@@ -177,9 +177,9 @@ function UsuarioAdd() {
                                 name="role" 
                                 id="role"
                                 className={`form-select input-clean ${roleError ? 'is-invalid' : ''}`}
-                                value={id_role} 
+                                value={role_id} 
                                 onChange={(e) => {
-                                    setIdRole(parseInt(e.target.value, 10));
+                                    setRoleId(parseInt(e.target.value, 10));
                                     if (e.target.value !== "0") setErrorRole("");
                                 }}
                             >
