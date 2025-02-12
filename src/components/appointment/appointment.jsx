@@ -14,10 +14,9 @@ function Appointment(props) {
             <td>{props.maquina}</td>
             <td>
                 {new Intl.DateTimeFormat('pt-BR', {
-                    dateStyle: 'short',
-                    timeStyle: 'short',
+                    dateStyle: 'short', // Formato curto de data (dd/mm/aaaa)
                     timeZone: 'America/Sao_Paulo'
-                }).format(new Date(new Date(dt).getTime() + (3 * 60 * 60 * 1000)))}
+                }).format(new Date(dt))}
             </td>
             <td>{props.lote}</td>
             <td>{props.lote_interno}</td>

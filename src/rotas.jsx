@@ -19,6 +19,8 @@ const MaquinasManutencao = lazy(() => import("./pages/maquinas-manutencao/maquin
 const MaquinasManutencaoAdd = lazy(() => import("./pages/maquina-manutencao-add/maquina-manutencao-add.jsx"));
 const Produtos = lazy(() => import("./pages/produtos/produtos.jsx"));
 const ProdutoAdd = lazy(() => import("./pages/produto-add/produto-add.jsx"));
+const Marcas = lazy(() => import("./pages/marcas/marcas.jsx"));
+const MarcaAdd = lazy(() => import("./pages/marca-add/marca-add.jsx"));
 
 // Componente de Spinner
 const Spinner = () => (
@@ -101,6 +103,10 @@ function Rotas() {
                     <Route path="/produtos" element={<PrivateRoute element={<Produtos />} role="1" />} />
                     <Route path="/produtos/add" element={<PrivateRoute element={<ProdutoAdd />} role="1" />} />
                     <Route path="/produtos/edit/:id" element={<PrivateRoute element={<ProdutoAdd />} role="1" />} />
+
+                    <Route path="/marcas" element={<PrivateRoute element={<Marcas />} role="1" />} />
+                    <Route path="/marcas/add" element={<PrivateRoute element={<MarcaAdd />} role="1" />} />
+                    <Route path="/marcas/edit/:id" element={<PrivateRoute element={<MarcaAdd />} role="1" />} />
 
                     <Route path="*" element={<Navigate to="/appointments" />} />
                 </Routes>

@@ -12,14 +12,17 @@ function AppointmentAdd() {
     const [maquinas, setMaquinas] = useState([]);
     const [turnos, setTurnos] = useState([]);
     const [produtos, setProdutos] = useState([]);
+    const [marcas, setMarcas] = useState([]);
 
     const [time, setTime] = useState("12:00");
 
     /* inputs */
     const { id } = useParams();
+    const [data_atual, setDataAtual] = useState("");
     const [id_maquina, setIdMaquina] = useState(0);
     const [id_turno, setIdTurno] = useState("");
     const [id_produto, setIdProduto] = useState("");
+    const [id_marca, setIdMarca] = useState("");
     const [lote, setLote] = useState("");
     const [loteInterno, setLoteInterno] = useState("");
     const [pesoB1, setPesoB1] = useState("");
@@ -41,6 +44,7 @@ function AppointmentAdd() {
     const [errorTurno, setErrorTurno] = useState("");
     const [errorProduto, setErrorProduto] = useState("");
     const [errorMaquina, setErrorMaquina] = useState("");
+    const [errorMarca, setErrorMarca] = useState("");
     const [loteError, setLoteError] = useState("");
     const [loteInternoError, setLoteInternoError] = useState("");
     const [pesoB1Error, setPesoB1Error] = useState("");
@@ -172,6 +176,26 @@ function AppointmentAdd() {
         }
     }
 
+    async function LoadMarcas() {
+        try {
+            const response = await api.get("/marca");
+
+            if (response.data) {
+                setMarcas(response.data);
+            }
+
+        } catch (error) {
+            if (error.response?.data.error) {
+                if (error.response.status == 401)
+                    return navigate("/");
+
+                alert(error.response?.data.error);
+            }
+            else
+                alert("Erro ao listar as marcas.");
+        }
+    }
+
     async function LoadAppointment(id) {
 
         try {
@@ -179,6 +203,8 @@ function AppointmentAdd() {
 
             if (response.data) {
                 if (response.data) {
+                    const dataFormatada = new Date(response.data.hora).toISOString().split('T')[0];
+                    setDataAtual(dataFormatada);
                     setIdTurno(response.data.turno_id);
                     setIdProduto(response.data.produto_id);
                     setIdMaquina(response.data.maquina_id);
@@ -199,7 +225,7 @@ function AppointmentAdd() {
                     setPesoB4(response.data.peso_b4);
                     setPesoB5(response.data.peso_b5);
                     setPesoEmbalagem(response.data.peso_embalagem);
-                    setMarca(response.data.marca);
+                    setIdMarca(response.data.marca_id);
                     setQuantidade(response.data.quantidade);
                     setEmbalagemUtilizada(response.data.embalagem_utilizada);
                     setPerca(response.data.perca);
@@ -232,7 +258,7 @@ function AppointmentAdd() {
             setErrorTurno("");
         }
 
-        if (id_turno === "" || id_turno === 0) {
+        if (id_produto === "" || id_produto === 0) {
             setErrorProduto("Produto é obrigatório.");
             if (!hasError) produtoRef.current?.focus();
             hasError = true;
@@ -272,12 +298,12 @@ function AppointmentAdd() {
             setPesoEmbalagemError("");
         }
 
-        if (!marca.trim()) {
-            setMarcaError("Marca é obrigatória.");
+        if (id_marca === "" || id_marca === 0) {
+            setErrorProduto("Marca é obrigatória.");
             if (!hasError) marcaRef.current?.focus();
             hasError = true;
         } else {
-            setMarcaError("");
+            setErrorMarca("");
         }
 
         if (!quantidade.trim()) {
@@ -313,6 +339,10 @@ function AppointmentAdd() {
         
         const usuario_id = localStorage.getItem('sessionId');  // ou do cookie, dependendo de onde você armazena
         
+        const data = new Date(data_atual);
+        data.setHours(0, 0, 0, 0);
+        const dataPostgreSQL = data.toISOString().replace('Z', '-03:00'); // Substitui "Z" (UTC) pelo fuso horário local
+
         const json = {
             maquina_id: id_maquina,
             produto_id: id_produto,
@@ -324,21 +354,21 @@ function AppointmentAdd() {
             peso_b4: pesos.pesoB4,
             peso_b5: pesos.pesoB5,
             peso_embalagem: pesoEmbalagem,
-            marca: marca,
+            marca_id: id_marca,
             quantidade: quantidade,
             embalagem_utilizada: embalagemUtilizada,
             perca: perca,
             teste_impacto: testeImpacto,
             verificado: verificado,
-            // hora: localISO,
+            hora: dataPostgreSQL,
             turno_id: id_turno,
             usuario_id: parseInt(usuario_id, 10),
             usuario_verificador_id: verificado ? parseInt(usuarioSelecionado, 10) : null,
             verificacao_carimbo: verificacaoCarimbo,
         };
 
-        if (!id > 0)
-            json.hora = localISO;
+        //if (!id > 0)
+            //json.hora = dt; //localISO;
 
         try { 
             const response = id > 0
@@ -367,6 +397,9 @@ function AppointmentAdd() {
         LoadTurnos();
         LoadProdutos();
         LoadUsuarios();
+        LoadMarcas();
+        const hoje = new Date().toISOString().split("T")[0];
+        setDataAtual(hoje);
     }, []);
 
     return (
@@ -379,6 +412,21 @@ function AppointmentAdd() {
                         <h2>Controle de Empacotamento</h2>
                     </div>
                     <div className="col-12 mt-4">
+
+                        <div className="mb-3">
+                            <label className="form-label">Data</label>
+                            <input
+                            type="date"
+                            name="data_atual"
+                            id="data_atual"
+                            className="form-control input-clean"
+                            onChange={(e) => {
+                                setDataAtual(e.target.value);
+                                if (dataError) setDataError("");
+                            }}
+                            value={data_atual}
+                            />
+                        </div>
 
                         <div className="mb-3">
                             <label htmlFor="turno" className="form-label">Turno</label>
@@ -402,7 +450,7 @@ function AppointmentAdd() {
                         </div>
 
                         <div className="mb-3">
-                            <label htmlFor="turno" className="form-label">Produto</label>
+                            <label htmlFor="produto" className="form-label">Produto</label>
                             <select
                                 ref={produtoRef}
                                 name="produto" 
@@ -576,6 +624,28 @@ function AppointmentAdd() {
                         </div>
 
                         <div className="mb-3">
+                            <label htmlFor="marca" className="form-label">Marca</label>
+                            <select
+                                ref={marcaRef}
+                                name="marca" 
+                                id="marca" 
+                                className={`form-select input-clean ${marcaError ? 'is-invalid' : ''}`}
+                                value={id_marca}
+                                onChange={(e) => {
+                                    setIdMarca(parseInt(e.target.value, 10));
+                                    if (e.target.value !== "0") setMarcaError("");
+                                }}
+                            >
+                                <option value="">Selecione a Marca</option>
+                                {marcas.map(t => (
+                                    <option key={t.id} value={t.id}>{t.nome}</option>
+                                ))}
+                            </select>
+                            {marcaError && <div className="invalid-feedback mt-2">{marcaError}</div>}
+                        </div>
+
+                        {/*}
+                        <div className="mb-3">
                             <label className="form-label">Marca</label>
                             <input 
                                 ref={marcaRef}
@@ -590,7 +660,7 @@ function AppointmentAdd() {
                                 id="marca" 
                             />
                             {marcaError && <div className="invalid-feedback mt-2">{marcaError}</div>}
-                        </div>
+                        </div> */}
 
                         <div className="mb-3">
                             <label className="form-label">Quantidade</label>

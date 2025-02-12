@@ -44,6 +44,11 @@ function NavBar() {
                                 <Link className="nav-link" to="/produtos">Produtos</Link>
                             </li>
                         )}
+                         {userRole === "1" && (
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/marcas">Marcas</Link>
+                            </li>
+                        )}
                         {userRole === "1" && (
                             <li className="nav-item">
                                 <Link className="nav-link" to="/maquinas">Máquinas</Link>
