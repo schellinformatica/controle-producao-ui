@@ -253,7 +253,7 @@ function Appointments() {
                                             hora={ap.hora}
                                             lote={ap.lote}
                                             lote_interno={ap.lote_interno}
-                                            marca={ap.marca}
+                                            marca={ap.marca.nome}
                                             media_peso={ap.media_peso}
                                             quantidade={ap.quantidade}
                                             confirmDelete={() => confirmDelete(ap)}
