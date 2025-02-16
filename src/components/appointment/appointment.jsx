@@ -13,12 +13,15 @@ function Appointment(props) {
         <tr style={{ cursor: 'pointer' }} onClick={handleRowClick}>
             <td>{props.maquina}</td>
             <td>{props.maquina_secundaria}</td>
-            <td>
-                {new Intl.DateTimeFormat('pt-BR', {
-                    dateStyle: 'short', // Formato curto de data (dd/mm/aaaa)
-                    timeZone: 'America/Sao_Paulo'
-                }).format(new Date(dt))}
-            </td>
+
+            <td>{
+                new Intl.DateTimeFormat('pt-BR', { 
+                    dateStyle: 'short', 
+                    timeStyle: 'short', 
+                    timeZone: 'America/Sao_Paulo' 
+                }).format(new Date(new Date(dt).getTime() + (3 * 60 * 60 * 1000))) // Ajuste de 3h
+            }</td>
+
             <td>{props.lote}</td>
             <td>{props.lote_interno}</td>
             <td>{props.marca}</td>
