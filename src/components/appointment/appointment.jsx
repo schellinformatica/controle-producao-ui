@@ -20,7 +20,7 @@ function Appointment(props) {
             </td>
             <td>{props.lote}</td>
             <td>{props.lote_interno}</td>
-            <td>{/*{props.marca} */}</td>
+            <td>{props.marca}</td>
             <td className="text-end">{props.media_peso}</td>
             <td className="text-end">{props.quantidade}</td>
 
