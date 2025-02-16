@@ -11,6 +11,9 @@ function Beneficiamento(props) {
                 {props.turno}
             </td>
             <td onClick={() => props.ClickEdit(props.id)}>
+                {!props.linha ? "" : props.linha === "LINHA_1" ? "1" : "2"}
+            </td>
+            <td onClick={() => props.ClickEdit(props.id)}>
                 {props.operador}
             </td>
           

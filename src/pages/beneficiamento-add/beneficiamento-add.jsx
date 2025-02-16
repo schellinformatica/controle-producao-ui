@@ -14,6 +14,7 @@ const BeneficiamentoEdit = () => {
     data: '',
     turno_id: '',
     usuario_id: '',
+    linha: '',
     beneficiamentos_itens: [],
   });
 
@@ -181,7 +182,8 @@ const BeneficiamentoEdit = () => {
       const json = {
         data: localISO,
         turno_id: Number(beneficiamento.turno_id),
-        usuario_id: Number(operador)
+        usuario_id: Number(operador),
+        linha: beneficiamento.linha
       };
 
       const response = await api.post("/beneficiamento", json);
@@ -212,7 +214,7 @@ const BeneficiamentoEdit = () => {
               <form className="row g-3">
               {step === 1 && (
                 <>
-                  <div className="col-md-4">
+                  <div className="col-md-3">
                     <label className="form-label">Data</label>
                     <input
                       type="date"
@@ -223,7 +225,7 @@ const BeneficiamentoEdit = () => {
                     />
                   </div>
 
-                  <div className="col-md-4">
+                  <div className="col-md-3">
                     <label className="form-label">Turno</label>
                     <select
                       name="turno_id"
@@ -240,7 +242,22 @@ const BeneficiamentoEdit = () => {
                     </select>                    
                   </div>
 
-                  <div className="col-md-4">
+                  <div className="col-md-3">
+                      <label htmlFor="linha" className="form-label">Linha</label>
+                      <select
+                          name="linha"
+                          id="linha"
+                          className="form-select input-clean"
+                          value={beneficiamento.linha}
+                          onChange={handleChange}
+                      >
+                          <option value="">Selecione a linha</option>
+                          <option value="LINHA_1">Linha 1</option>
+                          <option value="LINHA_2">Linha 2</option>
+                      </select>
+                  </div>
+
+                  <div className="col-md-3">
                     <label className="form-label">Operador</label>
                     <input
                       type="text"

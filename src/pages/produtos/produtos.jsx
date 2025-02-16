@@ -13,9 +13,7 @@ function Produtos() {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const limit = 20;
-
-    const userInitial = "AB"; // Exemplo de inicial do usuário
-
+    
     function ClickEdit(id) {
         navigate("/produtos/edit/" + id);
     }
@@ -70,9 +68,20 @@ function Produtos() {
         }
     }
 
+    const handleScroll = () => {
+        if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 50 && hasMore) {
+            LoadProdutos(page + 1);
+        }
+    };
+
     useEffect(() => {
         LoadProdutos(1);
     }, []);
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, [page, hasMore]);
 
     return (
         <div className="container-fluid mt-page">

@@ -82,30 +82,33 @@ function Beneficiamentos() {
                     </div>
 
                     <div style={{ marginTop: "33px" }}>
-                        <table className="table table-hover table-bordered">
-                            <thead className="table-light">
-                                <tr>
-                                    <th scope="col">Data</th>
-                                    <th scope="col">Turno</th>
-                                    <th scope="col">Operador</th>
-                                    <th scope="col" className="col-buttons"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    beneficiamento.map((ben) => {
-                                        return <Beneficiamento key={ben.id}
-                                                        id={ben.id}
-                                                        data={ben.data}
-                                                        turno={ben.turno.nome}
-                                                        operador={ben.usuario.nome}
-                                                        ClickEdit={ClickEdit}
-                                                        confirmDelete={() => confirmDelete(ben)}
-                                        />
-                                    }) 
-                                }
-                            </tbody>
-                        </table>
+                    <table className="table table-hover table-bordered">
+    <thead className="table-light">
+        <tr>
+            <th scope="col" className="text-center">Data</th>
+            <th scope="col" className="text-center">Turno</th>
+            <th scope="col" className="text-center">Linha</th>
+            <th scope="col" className="text-center">Operador</th>
+            <th scope="col" className="col-buttons text-end"></th>
+        </tr>
+    </thead>
+    <tbody className="text-center"> {/* Centraliza os conteúdos das células */}
+        {
+            beneficiamento.map((ben) => {
+                return <Beneficiamento key={ben.id}
+                                id={ben.id}
+                                data={ben.data}
+                                turno={ben.turno.nome}
+                                linha={ben.linha}
+                                operador={ben.usuario.nome}
+                                ClickEdit={ClickEdit}
+                                confirmDelete={() => confirmDelete(ben)}
+                />
+            }) 
+        }
+    </tbody>
+</table>
+
                     </div>
                 </div>
             </div>

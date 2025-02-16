@@ -5,6 +5,10 @@ import "react-time-picker/dist/TimePicker.css";
 import api from "../../constants/api.js";
 import "../../styles/custom/time-picker.css"; // Arquivo CSS personalizado
 import { useEffect, useRef, useState } from "react";
+import DatePicker, { registerLocale } from "react-datepicker";
+import { ptBR } from "date-fns/locale/pt-BR";
+
+registerLocale("pt-BR", ptBR);
 
 function AppointmentAdd() {
     const navigate = useNavigate();
@@ -16,10 +20,13 @@ function AppointmentAdd() {
 
     const [time, setTime] = useState("12:00");
 
+    const [startDate, setStartDate] = useState(new Date());
+
     /* inputs */
     const { id } = useParams();
     const [data_atual, setDataAtual] = useState("");
     const [id_maquina, setIdMaquina] = useState(0);
+    const [id_maquina_secundaria, setIdMaquinaSecundaria] = useState(0);
     const [id_turno, setIdTurno] = useState("");
     const [id_produto, setIdProduto] = useState("");
     const [id_marca, setIdMarca] = useState("");
@@ -39,11 +46,13 @@ function AppointmentAdd() {
     const [verificado, setVerificado] = useState(false);
     const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
     const [verificacaoCarimbo, setVerificacaoCarimbo] = useState(false);
+    const [peso, setPeso] = useState("");
     
     /* inputs error */
     const [errorTurno, setErrorTurno] = useState("");
     const [errorProduto, setErrorProduto] = useState("");
     const [errorMaquina, setErrorMaquina] = useState("");
+    const [errorMaquinaSecundaria, setErrorMaquinaSecundaria] = useState("");
     const [errorMarca, setErrorMarca] = useState("");
     const [loteError, setLoteError] = useState("");
     const [loteInternoError, setLoteInternoError] = useState("");
@@ -58,6 +67,7 @@ function AppointmentAdd() {
     const [embalagemUtilizadaError, setEmbalagemUtilizadaError] = useState("");
     const [percaError, setPercaError] = useState("");
     const [usuarios, setUsuarios] = useState([]);
+    const [pesoError, setPesoError] = useState("");
 
     const [pesos, setPesos] = useState({
         pesoB1: "",
@@ -70,6 +80,7 @@ function AppointmentAdd() {
 
     const loteRef = useRef(null);
     const maquinaRef = useRef(null);
+    const maquinaSecundariaRef = useRef(null);
     const loteInternoRef = useRef(null);
     const pesoEmbalagemRef = useRef(null);
     const marcaRef = useRef(null);
@@ -78,6 +89,7 @@ function AppointmentAdd() {
     const percaRef = useRef(null);
     const turnoRef = useRef(null);
     const produtoRef = useRef(null);
+    const pesoRef = useRef(null);
      
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -86,6 +98,10 @@ function AppointmentAdd() {
         if (/^\d*\.?\d*$/.test(newValue) || newValue === "") {
             setPesos((prev) => ({ ...prev, [name]: newValue }));
         }
+    };
+
+    const handleDateChange = (date) => {
+        setStartDate(date);
     };
 
     async function LoadUsuarios() {
@@ -203,6 +219,10 @@ function AppointmentAdd() {
 
             if (response.data) {
                 if (response.data) {
+
+                    const horaUtc = new Date(response.data.hora)
+                    const horaLocal = new Date(horaUtc.getTime() + horaUtc.getTimezoneOffset() * 60000);
+
                     const dataFormatada = new Date(response.data.hora).toISOString().split('T')[0];
                     setDataAtual(dataFormatada);
                     setIdTurno(response.data.turno_id);
@@ -233,6 +253,10 @@ function AppointmentAdd() {
                     setVerificado(response.data.verificado);
                     setUsuarioSelecionado(response.data.usuario_verificador_id);
                     setVerificacaoCarimbo(response.data.verificacao_carimbo);
+                    setPeso(response.data.peso);
+                    setIdMaquinaSecundaria(response.data.maquina_id_secundaria);
+
+                    setStartDate(horaLocal);
                 }
             }
         } catch (error) {
@@ -272,6 +296,14 @@ function AppointmentAdd() {
             hasError = true;
         } else {
             setErrorMaquina("");
+        }
+
+        if (id_maquina_secundaria === "" || id_maquina_secundaria === 0) {
+            setErrorMaquina("Máquina é obrigatório.");
+            if (!hasError) maquinaSecundariaRef.current?.focus();
+            hasError = true;
+        } else {
+            setErrorMaquinaSecundaria("");
         }
         
         if (!lote.trim()) {
@@ -330,6 +362,14 @@ function AppointmentAdd() {
             setPercaError("");
         }
 
+        if (!peso.trim()) {
+            setPesoError("Peso é obrigatório.");
+            if (!hasError) pesoRef.current?.focus();
+            hasError = true;
+        } else {
+            setPesoError("");
+        }
+
         if (hasError) return;
         
         const now = new Date();
@@ -342,6 +382,21 @@ function AppointmentAdd() {
         const data = new Date(data_atual);
         data.setHours(0, 0, 0, 0);
         const dataPostgreSQL = data.toISOString().replace('Z', '-03:00'); // Substitui "Z" (UTC) pelo fuso horário local
+
+        // Função para ajustar a data considerando o fuso horário
+        const adjustDateToLocalTimezone = (date) => {
+            // Crie uma nova instância da data
+            const localDate = new Date(date);
+            
+            // Obtenha a diferença de minutos entre a hora local e UTC (em minutos)
+            const timezoneOffset = localDate.getTimezoneOffset(); // em minutos
+            
+            // Ajuste a hora subtraindo o offset (para compensar o UTC)
+            localDate.setMinutes(localDate.getMinutes() - timezoneOffset);
+            
+            // Retorne a data ajustada para ser enviada para o backend
+            return localDate.toISOString(); // Retorna a data no formato ISO, por exemplo: '2025-02-15T17:55:00.000Z'
+        };
 
         const json = {
             maquina_id: id_maquina,
@@ -360,11 +415,13 @@ function AppointmentAdd() {
             perca: perca,
             teste_impacto: testeImpacto,
             verificado: verificado,
-            hora: dataPostgreSQL,
+            hora: adjustDateToLocalTimezone(startDate),
             turno_id: id_turno,
             usuario_id: parseInt(usuario_id, 10),
             usuario_verificador_id: verificado ? parseInt(usuarioSelecionado, 10) : null,
             verificacao_carimbo: verificacaoCarimbo,
+            peso: peso,
+            maquina_id_secundaria: id_maquina_secundaria
         };
 
         //if (!id > 0)
@@ -411,20 +468,21 @@ function AppointmentAdd() {
                     <div className="col-12 mt-4">
                         <h2>Controle de Empacotamento</h2>
                     </div>
-                    <div className="col-12 mt-4">
-
+                    <div className="col-12 mt-4">                        
                         <div className="mb-3">
-                            <label className="form-label">Data</label>
-                            <input
-                            type="date"
-                            name="data_atual"
-                            id="data_atual"
-                            className="form-control input-clean"
-                            onChange={(e) => {
-                                setDataAtual(e.target.value);
-                                if (dataError) setDataError("");
-                            }}
-                            value={data_atual}
+                            <label htmlFor="data-inicio" className="form-label d-block">Data e Hora</label>
+                            <DatePicker
+                            id="data-inicio"
+                            name="data-inicio"
+                            selected={startDate}
+                            onChange={handleDateChange}
+                            className="form-control input-clean input-datetime-filter"
+                            dateFormat="dd/MM/yyyy HH:mm" // Formato de data e hora
+                            locale="pt-BR"
+                            showTimeSelect={true} // Habilita o seletor de hora
+                            timeFormat="HH:mm" // Formato da hora
+                            timeIntervals={5} // Intervalo de 15 minutos no seletor de hora
+                            placeholderText="Selecione a data e hora"
                             />
                         </div>
 
@@ -470,9 +528,47 @@ function AppointmentAdd() {
                             {errorProduto && <div className="invalid-feedback mt-2">{errorProduto}</div>}
                         </div>
 
+                        <div className="mb-3">
+                            <label htmlFor="marca" className="form-label">Marca</label>
+                            <select
+                                ref={marcaRef}
+                                name="marca" 
+                                id="marca" 
+                                className={`form-select input-clean ${marcaError ? 'is-invalid' : ''}`}
+                                value={id_marca}
+                                onChange={(e) => {
+                                    setIdMarca(parseInt(e.target.value, 10));
+                                    if (e.target.value !== "0") setMarcaError("");
+                                }}
+                            >
+                                <option value="">Selecione a Marca</option>
+                                {marcas.map(t => (
+                                    <option key={t.id} value={t.id}>{t.nome}</option>
+                                ))}
+                            </select>
+                            {marcaError && <div className="invalid-feedback mt-2">{marcaError}</div>}
+                        </div>
 
                         <div className="mb-3">
-                            <label htmlFor="maquina" className="form-label">Máquina</label>
+                            <label htmlFor="peso" className="form-label">Peso</label>
+                            <select
+                                ref={pesoRef}
+                                name="peso"
+                                id="peso"
+                                className="form-select input-clean"
+                                value={peso}
+                                onChange={(e) => setPeso(e.target.value)}
+                            >
+                                <option value="">Selecione um Peso</option>
+                                <option value="KG_1">1kg</option>
+                                <option value="KG_2">2kg</option>
+                                <option value="KG_5">5kg</option>
+                            </select>
+                            {pesoError && <div className="invalid-feedback mt-2">{pesoError}</div>}
+                        </div>
+
+                        <div className="mb-3">
+                            <label htmlFor="maquina" className="form-label">Máquina 1</label>
                             <select
                                 ref={maquinaRef}
                                 name="maquina" 
@@ -490,6 +586,27 @@ function AppointmentAdd() {
                                 ))}
                             </select>
                             {errorMaquina && <div className="invalid-feedback mt-2">{errorMaquina}</div>}
+                        </div>
+
+                        <div className="mb-3">
+                            <label htmlFor="maquina" className="form-label">Máquina 2</label>
+                            <select
+                                ref={maquinaSecundariaRef}
+                                name="maquina_secundaria" 
+                                id="maquina_secundaria" 
+                                className={`form-select input-clean ${errorMaquinaSecundaria ? 'is-invalid' : ''}`}
+                                value={id_maquina_secundaria}
+                                onChange={(e) => {
+                                    setIdMaquinaSecundaria(parseInt(e.target.value, 10));
+                                    if (e.target.value !== "0") setErrorMaquinaSecundaria("");
+                                }}
+                            >
+                                <option value="">Selecione a Máquina</option>
+                                {maquinas.map(d => (
+                                    <option key={d.id} value={d.id}>{d.nome}</option>
+                                ))}
+                            </select>
+                            {errorMaquinaSecundaria && <div className="invalid-feedback mt-2">{errorMaquinaSecundaria}</div>}
                         </div>
                                                              
                         <div className="mb-3">
@@ -588,7 +705,6 @@ function AppointmentAdd() {
                             />
                         </div>
 
-                        {/* Exibir a média calculada */}
                         <div className="mb-3">
                             <label className="form-label">Média dos Pesos:</label>
                             <input type="text" 
@@ -622,45 +738,6 @@ function AppointmentAdd() {
                             />
                             {pesoEmbalagemError && <div className="invalid-feedback mt-2">{pesoEmbalagemError}</div>}
                         </div>
-
-                        <div className="mb-3">
-                            <label htmlFor="marca" className="form-label">Marca</label>
-                            <select
-                                ref={marcaRef}
-                                name="marca" 
-                                id="marca" 
-                                className={`form-select input-clean ${marcaError ? 'is-invalid' : ''}`}
-                                value={id_marca}
-                                onChange={(e) => {
-                                    setIdMarca(parseInt(e.target.value, 10));
-                                    if (e.target.value !== "0") setMarcaError("");
-                                }}
-                            >
-                                <option value="">Selecione a Marca</option>
-                                {marcas.map(t => (
-                                    <option key={t.id} value={t.id}>{t.nome}</option>
-                                ))}
-                            </select>
-                            {marcaError && <div className="invalid-feedback mt-2">{marcaError}</div>}
-                        </div>
-
-                        {/*}
-                        <div className="mb-3">
-                            <label className="form-label">Marca</label>
-                            <input 
-                                ref={marcaRef}
-                                value={marca}
-                                type="text"
-                                onChange={(e) => {
-                                    setMarca(e.target.value);
-                                    if (marcaError) setMarcaError("");
-                                }}
-                                className={`form-control input-clean ${marcaError ? 'is-invalid' : ''}`}  
-                                name="marca" 
-                                id="marca" 
-                            />
-                            {marcaError && <div className="invalid-feedback mt-2">{marcaError}</div>}
-                        </div> */}
 
                         <div className="mb-3">
                             <label className="form-label">Quantidade</label>
@@ -763,7 +840,7 @@ function AppointmentAdd() {
                             <label className="d-block mb-2">Verificado</label>
                             <label 
                                 className="border rounded p-3 d-flex align-items-center gap-3 cursor-pointer user-select-none w-100"
-                                htmlFor="verificado" // Garante que o clique ative o checkbox
+                                htmlFor="verificado"
                             >
                                 <input
                                     type="checkbox"
@@ -776,7 +853,6 @@ function AppointmentAdd() {
                             </label>
                         </div>
 
-                        {/* Campo select para escolher o usuário, visível apenas quando "verificado" for marcado */}
                         {verificado && (
                             <div className="mb-3">
                                 <label htmlFor="usuario" className="form-label">Usuário que verificou</label>
