@@ -244,7 +244,7 @@ function Appointments() {
                                     <th scope="col" className="col-buttons"></th>
                                 </tr>
                             </thead>
-                            {/*
+
                             <tbody>
                                 {
                                     appointments.map((ap) => (
@@ -254,7 +254,7 @@ function Appointments() {
                                             hora={ap.hora}
                                             lote={ap.lote}
                                             lote_interno={ap.lote_interno}
-                                            marca={ap.marca.nome}
+                                            //marca={ap.marca.nome}
                                             media_peso={ap.media_peso}
                                             quantidade={ap.quantidade}
                                             confirmDelete={() => confirmDelete(ap)}
@@ -265,7 +265,7 @@ function Appointments() {
                                         />
                                     ))
                                 }
-                            </tbody> */}
+                            </tbody>
                         </table>
                     </div>
                 </div>
