@@ -244,6 +244,7 @@ function Appointments() {
                                     <th scope="col" className="col-buttons"></th>
                                 </tr>
                             </thead>
+                            {/*
                             <tbody>
                                 {
                                     appointments.map((ap) => (
@@ -264,7 +265,7 @@ function Appointments() {
                                         />
                                     ))
                                 }
-                            </tbody>
+                            </tbody> */}
                         </table>
                     </div>
                 </div>
