@@ -235,7 +235,6 @@ function Appointments() {
                             <thead className="table-light">
                                 <tr>
                                     <th scope="col">Máquina 1</th>
-                                    <th scope="col">Máquina 2</th>
                                     <th scope="col">Data</th>
                                     <th scope="col">Lote</th>
                                     <th scope="col">Lote Interno</th>
@@ -251,7 +250,6 @@ function Appointments() {
                                         <Appointment key={ap.id}
                                             id={ap.id}
                                             maquina={ap.maquina.nome}
-                                            maquina_secundaria={ap.maquina_secundaria.nome}
                                             hora={ap.hora}
                                             lote={ap.lote}
                                             lote_interno={ap.lote_interno}
