@@ -20,7 +20,7 @@ function AppointmentAdd() {
 
     const [time, setTime] = useState("12:00");
 
-    const [startDate, setStartDate] = useState(new Date().toISOString());
+    const [startDate, setStartDate] = useState(new Date());
 
     /* inputs */
     const { id } = useParams();
