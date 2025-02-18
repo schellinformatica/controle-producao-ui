@@ -290,6 +290,16 @@ function AppointmentAdd() {
             setErrorProduto("");
         }
         
+        if (!id_maquina && !id_maquina_secundaria) {
+            setErrorMaquina("Selecione pelo menos uma máquina.");
+            setErrorMaquinaSecundaria("Selecione pelo menos uma máquina.");
+            return;
+        } else {
+            setErrorMaquina("");
+            setErrorMaquinaSecundaria("");
+        }
+        
+        /*
         if (id_maquina === "" || id_maquina === 0) {
             setErrorMaquina("Máquina é obrigatório.");
             if (!hasError) maquinaRef.current?.focus();
@@ -297,14 +307,14 @@ function AppointmentAdd() {
         } else {
             setErrorMaquina("");
         }
-
+            
         if (id_maquina_secundaria === "" || id_maquina_secundaria === 0) {
-            setErrorMaquina("Máquina é obrigatório.");
+            setErrorMaquinaSecundaria("Máquina 2 é obrigatória.");
             if (!hasError) maquinaSecundariaRef.current?.focus();
             hasError = true;
         } else {
             setErrorMaquinaSecundaria("");
-        }
+        } */
         
         if (!lote.trim()) {
             setLoteError("Lote é obrigatório.");
@@ -331,7 +341,7 @@ function AppointmentAdd() {
         }
 
         if (id_marca === "" || id_marca === 0) {
-            setErrorProduto("Marca é obrigatória.");
+            setErrorMarca("Marca é obrigatória.");
             if (!hasError) marcaRef.current?.focus();
             hasError = true;
         } else {
@@ -457,7 +467,16 @@ function AppointmentAdd() {
         LoadMarcas();
         const hoje = new Date().toISOString().split("T")[0];
         setDataAtual(hoje);
-    }, []);
+
+        if (id_maquina) {
+            setErrorMaquina(""); // Remove erro da máquina principal
+            setErrorMaquinaSecundaria(""); // Remove erro da máquina secundária
+        }
+        if (id_maquina_secundaria) {
+            setErrorMaquinaSecundaria(""); // Remove erro da máquina secundária
+            setErrorMaquina(""); // Remove erro da máquina principal
+        }
+    }, [id_maquina, id_maquina_secundaria]);
 
     return (
         <>
