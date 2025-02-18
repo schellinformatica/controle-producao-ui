@@ -77,7 +77,7 @@ function MaquinasManutencao() {
 
             const response = await api.post("/manutencao", json);
 
-            setHistoricoManutencao((prev) => [...prev, response.data]);
+            setHistoricoManutencao((prev) => [response.data, ...prev]);
             setDescricaoManutencao("");
         } catch (error) {
             alert("Erro ao adicionar manutenção.");
@@ -136,76 +136,80 @@ function MaquinasManutencao() {
 
             {showModal && selectedMaquina && (
                 <div className="modal show d-block" tabIndex="-1" role="dialog" style={{ background: "rgba(0,0,0,0.5)" }}>
-                    <div className="modal-dialog modal-xl">
-                        <div className="modal-content">
-                            <div className="modal-header border-0">
-                                <h5 className="modal-title">Histórico de Manutenção - {selectedMaquina.nome}</h5>
-                                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
-                            </div>
-
-                            <div className="modal-body">
-                                <table className="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Data Manutenção</th>
-                                            <th>Próxima Manutenção</th>
-                                            <th>Descrição</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {historicoManutencao.length > 0 ? (
-                                            historicoManutencao.map((item, index) => (
-                                                <tr key={index}>
-                                                    <td>{new Date(item.data).toLocaleDateString()}</td>
-                                                    <td>{new Date(item.data_proxima_manutencao).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</td>
-                                                    <td>{item.descricao}</td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="3" className="text-center">Nenhuma manutenção registrada.</td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-
-                                <div className="mt-4">
-                                    <label>Descrição</label>
-                                    <textarea
-                                        className="form-control mt-2"
-                                        value={descricaoManutencao}
-                                        onChange={(e) => setDescricaoManutencao(e.target.value)}
-                                        placeholder="Descreva a manutenção realizada"
-                                        rows={5}
-                                    />
-
-                                    <div className="col-md-3">
-                                    <label className="form-label mt-3">Data da próxima manutenção</label>
-                                    <input
-                                        type="date"
-                                        name="data"
-                                        value={dataProximaManutencao}
-                                        onChange={(e) => setDataProximaManutencao(e.target.value)}
-                                        className="form-control input-clean"
-                                    />
-                                    </div>
-
-                                    <button 
-                                        className="btn btn-primary btn-clean btn-default-formatted mt-4"
-                                        onClick={adicionarManutencao}
-                                    >
-                                        Adicionar Manutenção
-                                    </button>
-
-                                </div>
-                            </div>
-
-                            <div className="modal-footer border-0">
-                                <button type="button" className="btn btn-outline-secondary btn-clean" onClick={() => setShowModal(false)}>Fechar</button>
-                            </div>
-                        </div>
+                <div className="modal-dialog modal-xl">
+                  <div className="modal-content">
+                    <div className="modal-header border-0">
+                      <h5 className="modal-title">Histórico de Manutenção - {selectedMaquina.nome}</h5>
+                      <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
                     </div>
+              
+                    <div className="modal-body">
+                      {/* Campos de entrada */}
+                      <div className="mb-4">
+                        <label>Descrição</label>
+                        <textarea
+                          className="form-control input-clean mt-2"
+                          value={descricaoManutencao}
+                          onChange={(e) => setDescricaoManutencao(e.target.value)}
+                          placeholder="Descreva a manutenção realizada"
+                          rows={3}
+                        />
+              
+                        <div className="col-md-3">
+                          <label className="form-label mt-3">Data da próxima manutenção</label>
+                          <input
+                            type="date"
+                            name="data"
+                            value={dataProximaManutencao}
+                            onChange={(e) => setDataProximaManutencao(e.target.value)}
+                            className="form-control input-clean"
+                          />
+                        </div>
+              
+                        <button 
+                          className="btn btn-primary btn-clean btn-default-formatted mt-3"
+                          onClick={adicionarManutencao}
+                        >
+                          Adicionar Manutenção
+                        </button>
+                      </div>
+              
+                      {/* Contêiner para rolagem da tabela */}
+                      <div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #ddd", borderRadius: "5px", padding: "10px" }}>
+                        <table className="table table-striped">
+                          <thead>
+                            <tr>
+                              <th>Data Manutenção</th>
+                              <th>Próxima Manutenção</th>
+                              <th>Descrição</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {historicoManutencao.length > 0 ? (
+                              historicoManutencao.map((item, index) => (
+                                <tr key={index}>
+                                  <td>{new Date(item.data).toLocaleDateString()}</td>
+                                  <td>{new Date(item.data_proxima_manutencao).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</td>
+                                  <td style={{ wordBreak: "break-word", whiteSpace: "pre-line" }}>{item.descricao}</td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan="3" className="text-center">Nenhuma manutenção registrada.</td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+              
+                    <div className="modal-footer border-0">
+                      <button type="button" className="btn btn-outline-secondary btn-clean" onClick={() => setShowModal(false)}>Fechar</button>
+                    </div>
+                  </div>
                 </div>
+              </div>
+              
             )}
 
             <footer className="mt-auto" style={{ padding: "50px 0", backgroundColor: "#f8f9fa", color: "#6c757d", textAlign: "center" }}>
