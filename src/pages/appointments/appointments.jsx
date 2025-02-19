@@ -120,7 +120,34 @@ function Appointments() {
             setShowModalExclusao(false);
             setSelectedAppointment(null);
         }
-    }    
+    }
+    
+    // Função para ajustar a data considerando o fuso horário
+    const adjustDateToLocalTimezone = (date) => {
+        // Crie uma nova instância de Date para não modificar a original
+        const localDate = new Date(date);
+    
+        // Obtenha a diferença de minutos entre a hora local e UTC (em minutos)
+        const timezoneOffset = localDate.getTimezoneOffset(); // em minutos
+        
+        // Ajuste a hora subtraindo o offset (para compensar o UTC)
+        localDate.setMinutes(localDate.getMinutes() - timezoneOffset);
+        
+        // Retorne a data ajustada para ser enviada para o backend
+        return localDate.toISOString(); // Retorna a data no formato ISO, por exemplo: '2025-02-15T17:55:00.000Z'
+    };
+    
+    const handleCreateNewAppointment = async () => {
+        try {
+            const hora = adjustDateToLocalTimezone(new Date()); // Cria a data ajustada
+            const response = await api.post("/production", { hora });
+            navigate(`/appointments/edit/${response.data.id}`);
+        } catch (error) {
+            alert("Erro ao criar novo empacotamento.");
+            console.error(error);
+        }
+    };
+    
 
     function exportToExcel() {
     
@@ -194,9 +221,9 @@ function Appointments() {
                     </nav>
 
                     <div className="d-flex justify-content-between align-items-center mt-2">
-                        <Link to="/appointments/add" className="btn btn-primary btn-clean mt-3">
+                        <div className="btn btn-primary btn-clean mt-3" onClick={handleCreateNewAppointment}>
                             Novo empacotamento
-                        </Link>
+                        </div>
                         <button className="btn btn-outline-secondary btn-clean mt-3 ms-3" onClick={exportToExcel}>
                             <i className="bi bi-file-earmark-excel-fill"></i>
                         </button>
@@ -251,7 +278,7 @@ function Appointments() {
                                     appointments.map((ap) => (
                                         <Appointment key={ap.id}
                                             id={ap.id}
-                                            maquina={ap.maquina.nome}
+                                            maquina={ap.maquina?.nome}
                                             maquina_secundaria={ap.maquina_secundaria?.nome}
                                             hora={ap.hora}
                                             lote={ap.lote}

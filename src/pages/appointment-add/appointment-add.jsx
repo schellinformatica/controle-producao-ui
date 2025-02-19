@@ -7,22 +7,18 @@ import "../../styles/custom/time-picker.css"; // Arquivo CSS personalizado
 import { useEffect, useRef, useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { ptBR } from "date-fns/locale/pt-BR";
+import ModalParadas from "../../components/modal/ModalParadas.jsx";
 
 registerLocale("pt-BR", ptBR);
 
 function AppointmentAdd() {
     const navigate = useNavigate();
-
     const [maquinas, setMaquinas] = useState([]);
     const [turnos, setTurnos] = useState([]);
     const [produtos, setProdutos] = useState([]);
     const [marcas, setMarcas] = useState([]);
-
     const [time, setTime] = useState("12:00");
-
     const [startDate, setStartDate] = useState(new Date());
-
-    /* inputs */
     const { id } = useParams();
     const [data_atual, setDataAtual] = useState("");
     const [id_maquina, setIdMaquina] = useState(0);
@@ -69,6 +65,18 @@ function AppointmentAdd() {
     const [usuarios, setUsuarios] = useState([]);
     const [pesoError, setPesoError] = useState("");
 
+    const [usuarioVerificadorError, setUsuarioVerificadorError] = useState("");
+
+
+    const [action, setAction] = useState("");
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [reason, setReason] = useState("");
+    const [paradas, setParadas] = useState([]);
+    const [showModalParadas, setShowModalParadas] = useState(false);
+
+    // Seu componente ou função onde a média é calculada
+
     const [pesos, setPesos] = useState({
         pesoB1: "",
         pesoB2: "",
@@ -76,8 +84,10 @@ function AppointmentAdd() {
         pesoB4: "",
         pesoB5: "",
     });
-    const [errors, setErrors] = useState({});
 
+    const [mediaPesos, setMediaPesos] = useState("0.000");
+
+    const [errors, setErrors] = useState({});
     const loteRef = useRef(null);
     const maquinaRef = useRef(null);
     const maquinaSecundariaRef = useRef(null);
@@ -90,7 +100,13 @@ function AppointmentAdd() {
     const turnoRef = useRef(null);
     const produtoRef = useRef(null);
     const pesoRef = useRef(null);
+
+    const usuarioVerificadorRef = useRef(null);
      
+
+    const [usuarioVerificador, setUsuarioVerificador] = useState("");
+
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         const newValue = value.replace(",", ".");
@@ -255,8 +271,8 @@ function AppointmentAdd() {
                     setVerificacaoCarimbo(response.data.verificacao_carimbo);
                     setPeso(response.data.peso);
                     setIdMaquinaSecundaria(response.data.maquina_id_secundaria);
-
                     setStartDate(horaLocal);
+                    setUsuarioVerificador(response.data.usuario_verificador);
                 }
             }
         } catch (error) {
@@ -274,49 +290,41 @@ function AppointmentAdd() {
     async function SaveProducao() {
         let hasError = false;
 
-        if (id_turno === "" || id_turno === 0) {
+        if (!id_turno) {
             setErrorTurno("Turno é obrigatório.");
             if (!hasError) turnoRef.current?.focus();
             hasError = true;
         } else {
             setErrorTurno("");
         }
-
-        if (id_produto === "" || id_produto === 0) {
+        
+        if (!id_produto) {
             setErrorProduto("Produto é obrigatório.");
             if (!hasError) produtoRef.current?.focus();
             hasError = true;
         } else {
             setErrorProduto("");
         }
+
+        if (!id_marca) {
+            setErrorMarca("Marca é obrigatória.");
+            if (!hasError) marcaRef.current?.focus();
+            hasError = true;
+        } else {
+            setErrorMarca("");
+        }
         
         if (!id_maquina && !id_maquina_secundaria) {
             setErrorMaquina("Selecione pelo menos uma máquina.");
             setErrorMaquinaSecundaria("Selecione pelo menos uma máquina.");
-            return;
+            hasError = true;
+            // return;
         } else {
             setErrorMaquina("");
             setErrorMaquinaSecundaria("");
         }
         
-        /*
-        if (id_maquina === "" || id_maquina === 0) {
-            setErrorMaquina("Máquina é obrigatório.");
-            if (!hasError) maquinaRef.current?.focus();
-            hasError = true;
-        } else {
-            setErrorMaquina("");
-        }
-            
-        if (id_maquina_secundaria === "" || id_maquina_secundaria === 0) {
-            setErrorMaquinaSecundaria("Máquina 2 é obrigatória.");
-            if (!hasError) maquinaSecundariaRef.current?.focus();
-            hasError = true;
-        } else {
-            setErrorMaquinaSecundaria("");
-        } */
-        
-        if (!lote.trim()) {
+        if (!lote || !lote.trim()) {
             setLoteError("Lote é obrigatório.");
             if (!hasError) loteRef.current?.focus();
             hasError = true;
@@ -324,7 +332,7 @@ function AppointmentAdd() {
             setLoteError("");
         }
         
-        if (!loteInterno.trim()) {
+        if (!loteInterno || !loteInterno.trim()) {
             setLoteInternoError("Lote Interno é obrigatório.");
             if (!hasError) loteInternoRef.current?.focus();
             hasError = true;
@@ -332,7 +340,7 @@ function AppointmentAdd() {
             setLoteInternoError("");
         }
         
-        if (!pesoEmbalagem.trim()) {
+        if (!pesoEmbalagem || !pesoEmbalagem.trim()) {
             setPesoEmbalagemError("Peso Embalagem é obrigatório.");
             if (!hasError) pesoEmbalagemRef.current?.focus();
             hasError = true;
@@ -340,15 +348,7 @@ function AppointmentAdd() {
             setPesoEmbalagemError("");
         }
 
-        if (id_marca === "" || id_marca === 0) {
-            setErrorMarca("Marca é obrigatória.");
-            if (!hasError) marcaRef.current?.focus();
-            hasError = true;
-        } else {
-            setErrorMarca("");
-        }
-
-        if (!quantidade.trim()) {
+        if (!quantidade || !quantidade.trim()) {
             setQuantidadeError("Quantidade é obrigatória.");
             if (!hasError) quantidadeRef.current?.focus();
             hasError = true;
@@ -356,7 +356,7 @@ function AppointmentAdd() {
             setQuantidadeError("");
         }
 
-        if (!embalagemUtilizada.trim()) {
+        if (!embalagemUtilizada || !embalagemUtilizada.trim()) {
             setEmbalagemUtilizadaError("Embalagem utilizada (KG) é obrigatória.");
             if (!hasError) embalagemUtilizadaRef.current?.focus();
             hasError = true;
@@ -364,7 +364,7 @@ function AppointmentAdd() {
             setEmbalagemUtilizadaError("");
         }
 
-        if (!perca.trim()) {
+        if (!perca || !perca.trim()) {
             setPercaError("Perca (KG) é obrigatória.");
             if (!hasError) percaRef.current?.focus();
             hasError = true;
@@ -372,12 +372,20 @@ function AppointmentAdd() {
             setPercaError("");
         }
 
-        if (!peso.trim()) {
+        if (!peso || !peso.trim()) {
             setPesoError("Peso é obrigatório.");
             if (!hasError) pesoRef.current?.focus();
             hasError = true;
         } else {
             setPesoError("");
+        }
+
+        if (!usuarioVerificador || !usuarioVerificador.trim()) {
+            setUsuarioVerificadorError("Usuário é obrigatório.");
+            if (!hasError) usuarioVerificadorRef.current?.focus();
+            hasError = true;
+        } else {
+            setUsuarioVerificadorError("");
         }
 
         if (hasError) return;
@@ -428,7 +436,8 @@ function AppointmentAdd() {
             hora: adjustDateToLocalTimezone(startDate),
             turno_id: id_turno,
             usuario_id: parseInt(usuario_id, 10),
-            usuario_verificador_id: verificado ? parseInt(usuarioSelecionado, 10) : null,
+            // usuario_verificador_id: verificado ? parseInt(usuarioSelecionado, 10) : null,
+            usuario_verificador: verificado ? usuarioVerificador : null,
             verificacao_carimbo: verificacaoCarimbo,
             peso: peso,
             maquina_id_secundaria: id_maquina_secundaria
@@ -451,14 +460,24 @@ function AppointmentAdd() {
         }
     }  
      
-    const calcularMedia = () => {
-        const valores = Object.values(pesos)
-            .map(v => parseFloat(v.replace(",", "."))) // Converter para número e substituir vírgula por ponto
-            .filter(v => !isNaN(v)); // Remover valores inválidos
+    const calcularMedia = (pesos) => {
+        if (!pesos) return '0.000'; // Protege contra valores null ou undefined
     
-        return valores.length ? (valores.reduce((a, b) => a + b, 0) / valores.length).toFixed(3) : "0.000";
+        const valores = Object.values(pesos)
+          .map((v) => {
+            // Verifica se o valor é válido e converte
+            if (v && !isNaN(v.replace(',', '.'))) {
+              return parseFloat(v.replace(',', '.')); // Substitui vírgula por ponto e converte
+            }
+            return NaN; // Retorna NaN se o valor for inválido
+          })
+          .filter((v) => !isNaN(v)); // Remove valores inválidos (NaN)
+    
+        return valores.length
+          ? (valores.reduce((a, b) => a + b, 0) / valores.length).toFixed(3)
+          : '0.000'; // Retorna '0.000' se não houver valores válidos
     };
-
+    
     useEffect(() => {
         LoadMaquinas();
         LoadTurnos();
@@ -468,6 +487,7 @@ function AppointmentAdd() {
         const hoje = new Date().toISOString().split("T")[0];
         setDataAtual(hoje);
 
+        /*
         if (id_maquina) {
             setErrorMaquina(""); // Remove erro da máquina principal
             setErrorMaquinaSecundaria(""); // Remove erro da máquina secundária
@@ -475,8 +495,61 @@ function AppointmentAdd() {
         if (id_maquina_secundaria) {
             setErrorMaquinaSecundaria(""); // Remove erro da máquina secundária
             setErrorMaquina(""); // Remove erro da máquina principal
+        } */
+        if (showModal) {
+            setReason(""); // Limpa o campo de texto quando o modal abrir
         }
-    }, [id_maquina, id_maquina_secundaria]);
+
+    }, [showModal]);
+
+    const handleParar = (idConsulta) => {
+        setSelectedAppointment(idConsulta);
+        setAction("parar");
+        setShowModal(true);
+    };
+
+    const handleRetomar = (idConsulta) => {
+        setSelectedAppointment(idConsulta);
+        setAction("retomar");
+        setShowModal(true);
+    };
+
+    const handleStopProduction = async () => {
+        try {
+            if (action === "parar") {
+
+                if (reason.trim() === "") {
+                    alert("Por favor, informe o motivo para parar a produção.");
+                    return;
+                }
+
+                await api.post(`/production/${selectedAppointment}/stop`, { motivo: reason });
+            } else {
+                await api.post(`/production/${selectedAppointment}/resume`, { motivo: reason });
+            }
+            setShowModal(false);
+            // LoadAppointments(); // Recarrega a lista de produções após a alteração
+        } catch (error) {
+            alert("Erro ao " + action + " a produção: " + error.response?.data?.error || error.message);
+        }
+    };
+
+    // Função para tratar a mudança dos valores dos pesos
+    const handlePesoChange = (e) => {
+        const { name, value } = e.target;
+        setPesos((prevPesos) => {
+          const novosPesos = {
+            ...prevPesos,
+            [name]: value,
+          };
+    
+          // Após atualizar o peso, calcular a nova média e retornar o estado atualizado
+          const novaMedia = calcularMedia(novosPesos);
+          setMediaPesos(novaMedia);
+    
+          return novosPesos;
+        });
+    };
 
     return (
         <>
@@ -532,7 +605,7 @@ function AppointmentAdd() {
                                 ref={produtoRef}
                                 name="produto" 
                                 id="produto" 
-                                className={`form-select input-clean ${errorTurno ? 'is-invalid' : ''}`}
+                                className={`form-select input-clean ${errorProduto ? 'is-invalid' : ''}`}
                                 value={id_produto}
                                 onChange={(e) => {
                                     setIdProduto(parseInt(e.target.value, 10));
@@ -553,11 +626,11 @@ function AppointmentAdd() {
                                 ref={marcaRef}
                                 name="marca" 
                                 id="marca" 
-                                className={`form-select input-clean ${marcaError ? 'is-invalid' : ''}`}
+                                className={`form-select input-clean ${errorMarca ? 'is-invalid' : ''}`}
                                 value={id_marca}
                                 onChange={(e) => {
                                     setIdMarca(parseInt(e.target.value, 10));
-                                    if (e.target.value !== "0") setMarcaError("");
+                                    if (e.target.value !== "0") setErrorMarca("");
                                 }}
                             >
                                 <option value="">Selecione a Marca</option>
@@ -565,7 +638,7 @@ function AppointmentAdd() {
                                     <option key={t.id} value={t.id}>{t.nome}</option>
                                 ))}
                             </select>
-                            {marcaError && <div className="invalid-feedback mt-2">{marcaError}</div>}
+                            {errorMarca && <div className="invalid-feedback mt-2">{errorMarca}</div>}
                         </div>
 
                         <div className="mb-3">
@@ -608,7 +681,7 @@ function AppointmentAdd() {
                         </div>
 
                         <div className="mb-3">
-                            <label htmlFor="maquina" className="form-label">Máquina 2</label>
+                            <label htmlFor="maquina_secundaria" className="form-label">Máquina 2</label>
                             <select
                                 ref={maquinaSecundariaRef}
                                 name="maquina_secundaria" 
@@ -669,7 +742,7 @@ function AppointmentAdd() {
                             <input
                                 value={pesos.pesoB1}
                                 type="text"
-                                onChange={handleInputChange}
+                                onChange={handlePesoChange}
                                 className="form-control input-clean"
                                 name="pesoB1"
                                 id="pesoB1"
@@ -681,7 +754,7 @@ function AppointmentAdd() {
                             <input
                                 value={pesos.pesoB2}
                                 type="text"
-                                onChange={handleInputChange}
+                                onChange={handlePesoChange}
                                 className="form-control input-clean"
                                 name="pesoB2"
                                 id="pesoB2"
@@ -693,7 +766,7 @@ function AppointmentAdd() {
                             <input 
                                 value={pesos.pesoB3}
                                 type="text"
-                                onChange={handleInputChange}
+                                onChange={handlePesoChange}
                                 className="form-control input-clean" 
                                 name="pesoB3" 
                                 id="pesoB3" 
@@ -705,7 +778,7 @@ function AppointmentAdd() {
                             <input 
                                 value={pesos.pesoB4}
                                 type="text"
-                                onChange={handleInputChange}
+                                onChange={handlePesoChange}
                                 className="form-control input-clean" 
                                 name="pesoB4" 
                                 id="pesoB4" 
@@ -717,7 +790,7 @@ function AppointmentAdd() {
                             <input 
                                 value={pesos.pesoB5}
                                 type="text"
-                                onChange={handleInputChange}
+                                onChange={handlePesoChange}
                                 className="form-control input-clean" 
                                 name="pesoB5" 
                                 id="pesoB5" 
@@ -727,7 +800,7 @@ function AppointmentAdd() {
                         <div className="mb-3">
                             <label className="form-label">Média dos Pesos:</label>
                             <input type="text" 
-                            value={calcularMedia()} 
+                            value={mediaPesos} 
                             className="form-control input-clean" 
                             id="media-pesos"
                             name="media-pesos"
@@ -759,7 +832,7 @@ function AppointmentAdd() {
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label">Quantidade</label>
+                            <label className="form-label">Quantidade Fardos</label>
                             <input 
                                 ref={quantidadeRef}
                                 value={quantidade}
@@ -874,6 +947,29 @@ function AppointmentAdd() {
 
                         {verificado && (
                             <div className="mb-3">
+                                
+                                <div className="mb-3">
+                                    <label className="form-label">Usuário que verificou</label>
+                                    <input 
+                                        ref={usuarioVerificadorRef}
+                                        value={usuarioVerificador}
+                                        type="text"
+                                        onChange={(e) => {
+                                            setUsuarioVerificador(e.target.value);
+                                            if (usuarioVerificadorError) setUsuarioVerificadorError("");
+                                        }}
+                                        className={`form-control input-clean ${usuarioVerificadorError ? 'is-invalid' : ''}`} 
+                                        name="usuarioVerificador" 
+                                        id="usuarioVerificador" 
+                                    />
+                                    {usuarioVerificadorError && <div className="invalid-feedback mt-2">{usuarioVerificadorError}</div>}
+                                </div>
+
+
+ 
+
+
+                                {/*
                                 <label htmlFor="usuario" className="form-label">Usuário que verificou</label>
                                 <select
                                     name="usuario_verificador"
@@ -886,7 +982,7 @@ function AppointmentAdd() {
                                     {usuarios.map(usuario => (
                                         <option key={usuario.id} value={usuario.id}>{usuario.nome}</option>
                                     ))}
-                                </select>
+                                </select> */}
                             </div>
                         )}
 
@@ -896,6 +992,80 @@ function AppointmentAdd() {
                     </div>
                 </div>
             </div>
+
+            <div className="position-fixed" style={{ bottom: "20px", right: "20px" }}>
+                <button
+                    className="btn btn-secondary"
+                    style={{
+                        marginRight: "10px",
+                        borderRadius: "50%",
+                        padding: "15px 20px",
+                        fontSize: "16px",
+                        boxShadow: "2px 2px 10px rgba(0,0,0,0.2)"
+                    }}
+                    onClick={() => handleParar(id)}
+                    title="Parar a produção"
+                >
+                
+                <i className="bi bi-pause-fill"></i>
+                </button>
+
+                <button
+                    className="btn btn-primary"
+                    style={{
+                        borderRadius: "50%",
+                        padding: "15px 20px",
+                        fontSize: "16px",
+                        boxShadow: "2px 2px 10px rgba(0,0,0,0.2)"
+                    }}
+                    onClick={() => handleRetomar(id)}
+                    title="Retomar a produção"
+                >
+                <i className="bi bi-play-fill"></i>
+                </button> 
+            </div>
+
+            {/* Modal para confirmar a parada ou retomada */}
+            {showModal && (
+                <div className="modal fade show" style={{ display: "block" }} aria-modal="true" role="dialog">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">{action === "parar" ? "Parar" : "Retomar"} produção</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <p>Tem certeza que deseja {action === "parar" ? "parar" : "retomar"} a produção?</p>
+
+                                {action === "parar" && (
+                                    <div className="form-group">
+                                        <label htmlFor="motivo">Motivo</label>
+                                        <textarea
+                                            id="motivo"
+                                            name="motivo"
+                                            className="form-control"
+                                            rows="3"
+                                            value={reason}
+                                            onChange={(e) => setReason(e.target.value)}
+                                            placeholder="Informe o motivo para parar a produção."
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                                    Não
+                                </button>
+                                <button type="button" className="btn btn-primary" onClick={handleStopProduction}>
+                                    Sim
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <ModalParadas show={showModalParadas} onClose={() => setShowModalParadas(false)} paradas={paradas} />
 
             <footer className="mt-auto" style={{ padding: "50px 0", backgroundColor: "#f8f9fa", color: "#6c757d", textAlign: "center" }}>
                 <p>2025 Controle de Produção</p>
