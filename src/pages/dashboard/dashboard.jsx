@@ -18,7 +18,7 @@ function Dashboard() {
         labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
         datasets: [{
             label: "Produção (unidades)",
-            data: [100, 110, 120, 130, 120, 150, 160, 180, 165, 155, 200, 230],
+            data: dashboard, // Agora os dados vêm do banco
             fill: false,
             borderColor: "#00b0ff",
             tension: 0.1,
@@ -50,11 +50,21 @@ function Dashboard() {
         }
     };
 
-    async function LoadDashboard(currentPage = 1) {
+    async function LoadDashboard() {
         try {
-            const response = await api.get('/dashboard');
-            // const maquinaData = response.data;
-
+            const response = await api.get("/dashboard");
+            const producaoData = response.data;
+    
+            // Criar um array de 12 posições inicializado com 0
+            const meses = Array(12).fill(0);
+    
+            // Iterar sobre os dados e somar corretamente a quantidade em cada mês
+            producaoData.forEach(({ mes, quantidade }) => {
+                const index = mes - 1; // Ajusta índice (Janeiro = 0, Fevereiro = 1, etc.)
+                meses[index] += parseFloat(quantidade); // Acumula valores no mês correto
+            });
+    
+            setDashboard(meses); // Atualiza o estado do gráfico
         } catch (error) {
             if (error.response?.data.error) {
                 if (error.response.status === 401) return navigate("/");
@@ -64,6 +74,7 @@ function Dashboard() {
             }
         }
     }
+    
 
     useEffect(() => {
         LoadDashboard();
