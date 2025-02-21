@@ -418,6 +418,7 @@ function AppointmentAdd() {
             setErrorMarca("");
         }
         
+        {/*
         if (!id_maquina && !id_maquina_secundaria) {
             setErrorMaquina("Selecione pelo menos uma máquina.");
             setErrorMaquinaSecundaria("Selecione pelo menos uma máquina.");
@@ -426,7 +427,7 @@ function AppointmentAdd() {
         } else {
             setErrorMaquina("");
             setErrorMaquinaSecundaria("");
-        }
+        } */}
         
         if (!lote || !lote.trim()) {
             setLoteError("Lote é obrigatório.");
@@ -521,7 +522,7 @@ function AppointmentAdd() {
         };
 
         const json = {
-            maquina_id: id_maquina,
+            //maquina_id: id_maquina,
             produto_id: id_produto,
             lote: lote,
             lote_interno: loteInterno,
@@ -544,7 +545,7 @@ function AppointmentAdd() {
             usuario_verificador: verificado ? usuarioVerificador : null,
             verificacao_carimbo: verificacaoCarimbo,
             peso: peso,
-            maquina_id_secundaria: id_maquina_secundaria,
+            //maquina_id_secundaria: id_maquina_secundaria,
             maquina_selecionada: maquinaSelecionadaRadio
         };
 
@@ -763,7 +764,8 @@ function AppointmentAdd() {
                             </select>
                             {pesoError && <div className="invalid-feedback mt-2">{pesoError}</div>}
                         </div>
-
+                        
+                        {/*
                         <div className="mb-3">
                             <label htmlFor="maquina" className="form-label">Máquina 1</label>
                             <select
@@ -805,9 +807,8 @@ function AppointmentAdd() {
                             </select>
                             {errorMaquinaSecundaria && <div className="invalid-feedback mt-2">{errorMaquinaSecundaria}</div>}
                         </div>
+                        */}
 
-
-                        
                         <div className="mb-3">
                             <label className="form-label">Selecione a máquina:</label>
                             <div className="d-flex gap-4">

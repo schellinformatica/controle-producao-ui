@@ -11,8 +11,8 @@ function Appointment(props) {
 
     return (
         <tr style={{ cursor: 'pointer' }} onClick={handleRowClick}>
-            <td>{props.maquina}</td>
-            <td>{props.maquina_secundaria}</td>
+            {/*<td>{props.maquina}</td>
+            <td>{props.maquina_secundaria}</td>*/}
 
             <td>{
                 new Intl.DateTimeFormat('pt-BR', { 
@@ -29,7 +29,7 @@ function Appointment(props) {
             <td className="text-end">{props.quantidade}</td>
 
             <td className="text-end d-flex justify-content-end" onClick={stopPropagation}>
-                
+                {/*}
                 <button
                     onClick={(e) => { stopPropagation(e); props.ClickViewParadas(props.id); }}
                     className="btn btn-sm btn-outline-secondary btn-clean me-2">
@@ -46,7 +46,7 @@ function Appointment(props) {
                     onClick={(e) => { stopPropagation(e); props.ClickRetomar(props.id); }}
                     className="btn btn-sm btn-outline-secondary btn-clean me-2">
                     <i className="bi bi-play-fill"></i>
-                </button>
+                </button> */}
 
                 <button
                     onClick={(e) => { stopPropagation(e); props.confirmDelete(props.id); }}

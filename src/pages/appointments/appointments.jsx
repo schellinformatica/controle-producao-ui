@@ -178,8 +178,8 @@ function Appointments() {
                 "Marca": apt.marca?.nome || "N/A",
                 "Quantidade Fardos": quantidade,
                 "Peso (kg)": apt.peso || "N/A",
-                "Máquina 1": apt.maquina?.nome || "N/A",
-                "Máquina 2": apt.maquina_secundaria?.nome || "N/A",
+                //"Máquina 1": apt.maquina?.nome || "N/A",
+                //"Máquina 2": apt.maquina_secundaria?.nome || "N/A",
                 "Lote": apt.lote || "N/A",
                 "Lote Interno": apt.lote_interno || "N/A",
                 "P1": apt.peso_b1 ? Number(apt.peso_b1).toFixed(2) : "N/A",
@@ -277,8 +277,8 @@ function Appointments() {
                         <table className="table table-hover table-bordered">
                             <thead className="table-light">
                                 <tr>
-                                    <th scope="col">Máquina 1</th>
-                                    <th scope="col">Máquina 2</th>
+                                    {/*<th scope="col">Máquina 1</th>
+                                    <th scope="col">Máquina 2</th> */}
                                     <th scope="col">Data</th>
                                     <th scope="col">Lote</th>
                                     <th scope="col">Lote Interno</th>
@@ -294,8 +294,8 @@ function Appointments() {
                                     appointments.map((ap) => (
                                         <Appointment key={ap.id}
                                             id={ap.id}
-                                            maquina={ap.maquina?.nome}
-                                            maquina_secundaria={ap.maquina_secundaria?.nome}
+                                            /*maquina={ap.maquina?.nome}
+                                            maquina_secundaria={ap.maquina_secundaria?.nome}*/
                                             hora={ap.hora}
                                             lote={ap.lote}
                                             lote_interno={ap.lote_interno}
