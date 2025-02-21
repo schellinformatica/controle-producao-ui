@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { ptBR } from "date-fns/locale/pt-BR";
 import ModalParadas from "../../components/modal/ModalParadas.jsx";
+import RegistroParadaModal from "../../components/modal/RegistroParadaModal.jsx";
 
 registerLocale("pt-BR", ptBR);
 
@@ -19,6 +20,10 @@ function AppointmentAdd() {
     const [marcas, setMarcas] = useState([]);
     const [time, setTime] = useState("12:00");
     const [startDate, setStartDate] = useState(new Date());
+
+    const [startDateParada, setStartDateParada] = useState(new Date());
+    const [startDateRetorno, setStartDateRetorno] = useState(new Date());
+
     const { id } = useParams();
     const [data_atual, setDataAtual] = useState("");
     const [id_maquina, setIdMaquina] = useState(0);
@@ -75,6 +80,10 @@ function AppointmentAdd() {
     const [paradas, setParadas] = useState([]);
     const [showModalParadas, setShowModalParadas] = useState(false);
 
+
+
+    const [selectedProducaoParada, setSelectedProducaoParada] = useState(null);
+
     // Seu componente ou função onde a média é calculada
 
     const [pesos, setPesos] = useState({
@@ -106,6 +115,42 @@ function AppointmentAdd() {
 
     const [usuarioVerificador, setUsuarioVerificador] = useState("");
 
+    const [maquinaSelecionadaRadio, setMaquinaSelecionadaRadio] = useState(""); 
+
+    const [showModalRegistroParada, setShowModalRegistroParada] = useState(false);
+
+    const [producaoParadas, setProducaoParadas] = useState([]);
+    const [selectedProducao, setSelectedProducao] = useState(null);
+
+    const [motivoParadaProducao, setMotivoParadaProducao] = useState("");
+
+    const handleOpenModal = (producao_id) => {
+        setSelectedProducaoParada(producao_id)
+        setShowModalRegistroParada(true);
+    };
+
+    
+    async function loadProducaoParadas(producao_id) {
+        try {
+            const response = await api.get(`/production/${producao_id}/paradas`);
+            setProducaoParadas(response.data);
+            // setSelectedMaquina(maquinasManutencao.find((mq) => mq.id === id));
+
+            setStartDateParada(new Date());
+            setStartDateRetorno(new Date());
+
+            setShowModalRegistroParada(true);
+        } catch (error) {
+            alert("Erro ao carregar histórico de paradas da produção.");
+        }
+    }
+
+
+
+    // Função para fechar o modal
+    const handleCloseModal = () => {
+        setShowModalRegistroParada(false);
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -119,6 +164,64 @@ function AppointmentAdd() {
     const handleDateChange = (date) => {
         setStartDate(date);
     };
+
+    const handleDateChangeParada = (date) => {
+        setStartDateParada(date);
+    };
+
+    const handleDateChangeRetorno = (date) => {
+        setStartDateRetorno(date);
+    };
+
+    async function adicionarParadaProducao() {
+        if (!motivoParadaProducao.trim()) {
+            alert("O motivo não pode estar vazia.");
+            return;
+        }
+
+
+        const adjustDateToLocalTimezone = (date) => {
+            // Crie uma nova instância da data
+            const localDate = new Date(date);
+            
+            // Obtenha a diferença de minutos entre a hora local e UTC (em minutos)
+            const timezoneOffset = localDate.getTimezoneOffset(); // em minutos
+            
+            // Ajuste a hora subtraindo o offset (para compensar o UTC)
+            localDate.setMinutes(localDate.getMinutes() - timezoneOffset);
+            
+            // Retorne a data ajustada para ser enviada para o backend
+            return localDate.toISOString(); // Retorna a data no formato ISO, por exemplo: '2025-02-15T17:55:00.000Z'
+        };
+
+        /*
+        if (!dataProximaManutencao.trim()) {
+            alert("A data da próxima manutenção não pode estar vazia.");
+            return;
+        }*/
+
+        try {
+            const now = new Date();
+            const localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+            .toISOString();            
+
+            const json = {
+                producao_id: parseInt(id, 10),
+                motivo: motivoParadaProducao,
+                hora_parada: adjustDateToLocalTimezone(startDateParada),
+                hora_retorno: adjustDateToLocalTimezone(startDateRetorno),
+                tempo_parada: 5
+            }
+
+            const response = await api.post(`/production/${id}/paradas`, json);
+
+            setProducaoParadas((prev) => [response.data, ...prev]);
+            // setDescricaoManutencao("");
+            setMotivoParadaProducao("");
+        } catch (error) {
+            alert("Erro ao adicionar a parada.");
+        }
+    }
 
     async function LoadUsuarios() {
         try {
@@ -273,6 +376,7 @@ function AppointmentAdd() {
                     setIdMaquinaSecundaria(response.data.maquina_id_secundaria);
                     setStartDate(horaLocal);
                     setUsuarioVerificador(response.data.usuario_verificador);
+                    setMaquinaSelecionadaRadio(response.data.maquina_selecionada);
                 }
             }
         } catch (error) {
@@ -440,7 +544,8 @@ function AppointmentAdd() {
             usuario_verificador: verificado ? usuarioVerificador : null,
             verificacao_carimbo: verificacaoCarimbo,
             peso: peso,
-            maquina_id_secundaria: id_maquina_secundaria
+            maquina_id_secundaria: id_maquina_secundaria,
+            maquina_selecionada: maquinaSelecionadaRadio
         };
 
         //if (!id > 0)
@@ -700,6 +805,61 @@ function AppointmentAdd() {
                             </select>
                             {errorMaquinaSecundaria && <div className="invalid-feedback mt-2">{errorMaquinaSecundaria}</div>}
                         </div>
+
+
+                        
+                        <div className="mb-3">
+                            <label className="form-label">Selecione a máquina:</label>
+                            <div className="d-flex gap-4">
+                                <div>
+                                    <input
+                                        className="btn-check"
+                                        type="radio"
+                                        id="maquina1"
+                                        name="maquina"
+                                        value="maquina1"
+                                        checked={maquinaSelecionadaRadio === "maquina1"}
+                                        onChange={(e) => setMaquinaSelecionadaRadio(e.target.value)}
+                                    />
+                                    <label className="btn btn-outline-primary" htmlFor="maquina1">
+                                        Máquina 1
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <input
+                                        className="btn-check"
+                                        type="radio"
+                                        id="maquina2"
+                                        name="maquina"
+                                        value="maquina2"
+                                        checked={maquinaSelecionadaRadio === "maquina2"}
+                                        onChange={(e) => setMaquinaSelecionadaRadio(e.target.value)}
+                                    />
+                                    <label className="btn btn-outline-primary" htmlFor="maquina2">
+                                        Máquina 2
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <input
+                                        className="btn-check"
+                                        type="radio"
+                                        id="maquinaAmbas"
+                                        name="maquina"
+                                        value="ambas"
+                                        checked={maquinaSelecionadaRadio === "ambas"}
+                                        onChange={(e) => setMaquinaSelecionadaRadio(e.target.value)}
+                                    />
+                                    <label className="btn btn-outline-primary" htmlFor="maquinaAmbas">
+                                        Máquina 1 e 2
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+
+
                                                              
                         <div className="mb-3">
                             <label className="form-label">Lote</label>
@@ -965,10 +1125,6 @@ function AppointmentAdd() {
                                     {usuarioVerificadorError && <div className="invalid-feedback mt-2">{usuarioVerificadorError}</div>}
                                 </div>
 
-
- 
-
-
                                 {/*
                                 <label htmlFor="usuario" className="form-label">Usuário que verificou</label>
                                 <select
@@ -986,13 +1142,20 @@ function AppointmentAdd() {
                             </div>
                         )}
 
-                        <button onClick={SaveProducao} className="btn btn-primary btn-clean" type="button">
+                        <button onClick={SaveProducao} className="btn btn-primary btn-clean w-100" type="button">
                             Salvar
                         </button>
+
+                        <div>
+                            <button onClick={() => loadProducaoParadas(id)} className="btn btn-secondary btn-clean w-100 mt-3" type="button">
+                                Registro de Parada
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-
+            
+            {/*
             <div className="position-fixed" style={{ bottom: "20px", right: "20px" }}>
                 <button
                     className="btn btn-secondary"
@@ -1023,7 +1186,7 @@ function AppointmentAdd() {
                 >
                 <i className="bi bi-play-fill"></i>
                 </button> 
-            </div>
+            </div> */}
 
             {/* Modal para confirmar a parada ou retomada */}
             {showModal && (
@@ -1064,6 +1227,147 @@ function AppointmentAdd() {
                     </div>
                 </div>
             )}
+
+
+            {showModalRegistroParada && (
+            <div className="modal show d-block" tabIndex="-1" role="dialog" style={{ background: "rgba(0,0,0,0.6)" }}>
+                <div className="modal-dialog modal-lg">
+                <div className="modal-content">
+                    <div className="modal-header">
+                    <h5 className="modal-title">Registrar Parada</h5>
+                    <button type="button" className="btn-close" onClick={() => setShowModalRegistroParada(false)} aria-label="Fechar"></button>
+                    </div>
+
+                    <div className="modal-body">
+                    <div className="row">
+                        {/* Motivo */}
+                        <div className="col-12 mb-4">
+                        <label htmlFor="motivo" className="form-label">Motivo da Parada</label>
+                        <textarea
+                            id="motivo"
+                            className="form-control input-clean"
+                            placeholder="Descreva o motivo da parada"
+                            value={motivoParadaProducao}
+                            onChange={(e) => setMotivoParadaProducao(e.target.value)}
+                            rows={5}
+                            style={{ resize: 'none', borderRadius: '8px' }}
+                        />
+                        </div>
+
+                        {/* Colunas de Data e Hora */}
+                        <div className="col-md-6 mb-3">
+                        <label htmlFor="data-inicio" className="form-label">Data e Hora da Parada</label>
+                        <DatePicker
+                            id="data-inicio"
+                            name="data-inicio"
+                            selected={startDateParada}
+                            onChange={handleDateChangeParada}
+                            className="form-control input-clean"
+                            dateFormat="dd/MM/yyyy HH:mm"
+                            locale="pt-BR"
+                            showTimeSelect={true}
+                            timeFormat="HH:mm"
+                            timeIntervals={5}
+                            placeholderText="Selecione a data e hora"
+                            style={{ borderRadius: '8px' }}
+                        />
+                        </div>
+
+                        <div className="col-md-6 mb-3">
+                        <label htmlFor="data-fim" className="form-label">Data e Hora do Retorno</label>
+                        <DatePicker
+                            id="data-fim"
+                            name="data-fim"
+                            selected={startDateRetorno}
+                            onChange={handleDateChangeRetorno}
+                            className="form-control input-clean"
+                            dateFormat="dd/MM/yyyy HH:mm"
+                            locale="pt-BR"
+                            showTimeSelect={true}
+                            timeFormat="HH:mm"
+                            timeIntervals={5}
+                            placeholderText="Selecione a data e hora"
+                            style={{ borderRadius: '8px' }}
+                        />
+                        </div>
+                    </div>
+
+                    {/* Botão Adicionar */}
+                    <div className="d-flex justify-content-center mt-4">
+                        <button 
+                        className="btn btn-primary w-50 py-2"
+                        style={{ borderRadius: '8px', transition: 'background-color 0.3s' }}
+                        onClick={adicionarParadaProducao}
+                        >
+                        Adicionar
+                        </button>
+                    </div>
+
+                    {/* Histórico de Registros */}
+                    <div className="mt-4">
+                        <div style={{
+                        maxHeight: "300px", 
+                        overflowY: "auto", 
+                        border: "1px solid #ddd", 
+                        borderRadius: "8px", 
+                        padding: "10px", 
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        }}>
+                        <table className="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Hora Parada</th>
+                                <th>Hora Retorno</th>
+                                <th>Motivo</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+      
+                            { producaoParadas.map((item, index) => (
+                                <tr key={index}>
+
+                                <td>{
+                                    new Intl.DateTimeFormat('pt-BR', { 
+                                        dateStyle: 'short', 
+                                        timeStyle: 'short', 
+                                        timeZone: 'America/Sao_Paulo' 
+                                    }).format(new Date(new Date(item.hora_parada).getTime() + (3 * 60 * 60 * 1000))) // Ajuste de 3h
+                                }</td>
+
+                                <td>{
+                                    new Intl.DateTimeFormat('pt-BR', { 
+                                        dateStyle: 'short', 
+                                        timeStyle: 'short', 
+                                        timeZone: 'America/Sao_Paulo' 
+                                    }).format(new Date(new Date(item.hora_retorno).getTime() + (3 * 60 * 60 * 1000))) // Ajuste de 3h
+                                }</td>
+
+                                <td>{item.motivo}</td>
+                                </tr>
+                            )) }
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div className="modal-footer">
+                    <button type="button" className="btn btn-outline-secondary" onClick={() => setShowModalRegistroParada(false)}>
+                        Fechar
+                    </button>
+                    </div>
+                </div>
+                </div>
+            </div>
+            )}
+
+
+
+            
+
+
+
+
 
             <ModalParadas show={showModalParadas} onClose={() => setShowModalParadas(false)} paradas={paradas} />
 

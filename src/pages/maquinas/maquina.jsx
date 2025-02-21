@@ -137,7 +137,7 @@ function Maquinas() {
                 <div className="container-custom mt-2">
                     <nav aria-label="breadcrumb">
                         <ol className="breadcrumb">
-                            <li className="breadcrumb-item"><Link to="/">Dashboard</Link></li>
+                            <li className="breadcrumb-item"><Link to="/dashboard">Dashboard</Link></li>
                             <li className="breadcrumb-item active" aria-current="page">Máquinas</li>
                         </ol>
                     </nav>

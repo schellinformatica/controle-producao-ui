@@ -67,48 +67,45 @@ function Beneficiamentos() {
             <NavBar />
             <div className="content-wrapper">
                 <div className="container-custom mt-2">
-                        <nav aria-label="breadcrumb">
-                            <ol className="breadcrumb">
-                                <li className="breadcrumb-item"><Link to="/">Dashboard</Link></li>
-                                <li className="breadcrumb-item active" aria-current="page">Beneficiamento</li>
-                            </ol>
-                        </nav>
-
+                    <nav aria-label="breadcrumb">
+                        <ol className="breadcrumb">
+                            <li className="breadcrumb-item"><Link to="/dashboard">Dashboard</Link></li>
+                            <li className="breadcrumb-item active" aria-current="page">Beneficiamento</li>
+                        </ol>
+                    </nav>
                     <div>
                         <Link to="/beneficiamentos/add" className="btn btn-primary btn-clean mt-3">
                             Novo beneficiamento
                         </Link>
-
                     </div>
 
                     <div style={{ marginTop: "33px" }}>
-                    <table className="table table-hover table-bordered">
-    <thead className="table-light">
-        <tr>
-            <th scope="col" className="text-center">Data</th>
-            <th scope="col" className="text-center">Turno</th>
-            <th scope="col" className="text-center">Linha</th>
-            <th scope="col" className="text-center">Operador</th>
-            <th scope="col" className="col-buttons text-end"></th>
-        </tr>
-    </thead>
-    <tbody className="text-center"> {/* Centraliza os conteúdos das células */}
-        {
-            beneficiamento.map((ben) => {
-                return <Beneficiamento key={ben.id}
-                                id={ben.id}
-                                data={ben.data}
-                                turno={ben.turno.nome}
-                                linha={ben.linha}
-                                operador={ben.usuario.nome}
-                                ClickEdit={ClickEdit}
-                                confirmDelete={() => confirmDelete(ben)}
-                />
-            }) 
-        }
-    </tbody>
-</table>
-
+                        <table className="table table-hover table-bordered">
+                            <thead className="table-light">
+                                <tr>
+                                    <th scope="col" className="text-center">Data</th>
+                                    <th scope="col" className="text-center">Turno</th>
+                                    <th scope="col" className="text-center">Linha</th>
+                                    <th scope="col" className="text-center">Operador</th>
+                                    <th scope="col" className="col-buttons text-end"></th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-center"> {/* Centraliza os conteúdos das células */}
+                                {
+                                    beneficiamento.map((ben) => {
+                                        return <Beneficiamento key={ben.id}
+                                                        id={ben.id}
+                                                        data={ben.data}
+                                                        turno={ben.turno.nome}
+                                                        linha={ben.linha}
+                                                        operador={ben.usuario.nome}
+                                                        ClickEdit={ClickEdit}
+                                                        confirmDelete={() => confirmDelete(ben)}
+                                        />
+                                    }) 
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -145,7 +142,6 @@ function Beneficiamentos() {
             <footer className="mt-auto" style={{ padding: "50px 0", backgroundColor: "#f8f9fa", color: "#6c757d", textAlign: "center" }}>
                 <p>2025 Controle de Produção</p>
             </footer>
-            
         </div>
     );
 }

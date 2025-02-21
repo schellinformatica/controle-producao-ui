@@ -150,63 +150,79 @@ function Appointments() {
     
 
     function exportToExcel() {
-    
         let totalProducaoGeral = 0;
         const totalPorMarca = {};
-
+    
         const dadosExcel = appointments.map((apt) => {
             const quantidade = Number(apt.quantidade);
             totalProducaoGeral += quantidade;
-
-            if (!totalPorMarca[apt.marca]) {
-                totalPorMarca[apt.marca] = 0;
+    
+            if (apt.marca?.nome) {
+                totalPorMarca[apt.marca.nome] = (totalPorMarca[apt.marca.nome] || 0) + quantidade;
             }
-            totalPorMarca[apt.marca] += quantidade;
-
-            // Calcula a média dos pesos B1 até B5
+    
+            // Média dos pesos B1 até B5
             const pesos = [apt.peso_b1, apt.peso_b2, apt.peso_b3, apt.peso_b4, apt.peso_b5]
-                .map(p => Number(p) || 0); // Garante que valores nulos ou undefined não causem erro
-            const mediaPesos = pesos.reduce((acc, val) => acc + val, 0) / pesos.length;
-
-            // Corrige o horário adicionando 3 horas (caso esteja UTC e precise converter para o fuso local)
+                .map(p => Number(p) || 0);
+            const mediaPesos = (pesos.reduce((acc, val) => acc + val, 0) / pesos.length).toFixed(3);
+    
+            // Ajusta a data e hora
             const horaAjustada = new Date(apt.hora);
-            horaAjustada.setHours(horaAjustada.getHours() + 3); // Ajuste de fuso horário
-
+            horaAjustada.setHours(horaAjustada.getHours() + 3);
+            const dataFormatada = horaAjustada.toLocaleString();
+    
             return {
-                "Máquina": apt.maquina?.nome || "N/A",
-                "Data": horaAjustada.toLocaleString(), // Exibir no formato correto
-                "Lote": apt.lote,
-                "Marca": apt.marca,
-                "Quantidade": quantidade,
-                "Média Pesos (B1-B5)": mediaPesos.toFixed(3), // 3 casas decimais
+                "Data e Hora": dataFormatada,
+                "Turno": apt.turno?.nome || "N/A",
+                "Produto": apt.produto?.nome || "N/A",
+                "Marca": apt.marca?.nome || "N/A",
+                "Quantidade Fardos": quantidade,
+                "Peso (kg)": apt.peso || "N/A",
+                "Máquina 1": apt.maquina?.nome || "N/A",
+                "Máquina 2": apt.maquina_secundaria?.nome || "N/A",
+                "Lote": apt.lote || "N/A",
+                "Lote Interno": apt.lote_interno || "N/A",
+                "P1": apt.peso_b1 ? Number(apt.peso_b1).toFixed(2) : "N/A",
+                "P2": apt.peso_b2 ? Number(apt.peso_b2).toFixed(2) : "N/A",
+                "P3": apt.peso_b3 ? Number(apt.peso_b3).toFixed(2) : "N/A",
+                "P4": apt.peso_b4 ? Number(apt.peso_b4).toFixed(2) : "N/A",
+                "P5": apt.peso_b5 ? Number(apt.peso_b5).toFixed(2) : "N/A",
+                "Média Pesos (B1-B5)": mediaPesos,
+                "Peso Embalagem (kg)": apt.peso_embalagem ? Number(apt.peso_embalagem).toFixed(2) : "N/A",
+                "Embalagem Utilizada": apt.embalagem_utilizada || "N/A",
+                "Perca (KG)": apt.perca || "N/A",
+                "Teste Impacto": apt.teste_impacto || "N/A",
+                "Verificação Carimbo": apt.verificao_carimbo || "N/A",
+                "Usuário Verificador": apt.usuario_verificador || "N/A"
             };
         });
-
-        // Adiciona os totalizadores na planilha
+    
+        // Adiciona separação e totalizadores
         dadosExcel.push({});
-        dadosExcel.push({ "Marca": "Total Geral", "Quantidade": totalProducaoGeral });
-
+        dadosExcel.push({ "Marca": "Total Geral", "Quantidade Fardos": totalProducaoGeral });
+    
         dadosExcel.push({});
         dadosExcel.push({ "Marca": "Total por Marca" });
-
+    
         Object.entries(totalPorMarca).forEach(([marca, total]) => {
-            dadosExcel.push({ "Marca": marca, "Quantidade": total });
+            dadosExcel.push({ "Marca": marca, "Quantidade Fardos": total });
         });
-
+    
         // Criar a planilha e baixar o arquivo
         const ws = XLSX.utils.json_to_sheet(dadosExcel);
-
+    
         // Autofit: Ajusta automaticamente a largura das colunas
         const colWidths = Object.keys(dadosExcel[0]).map((key) => ({
             wch: Math.max(...dadosExcel.map(row => String(row[key] || "").length), key.length) + 2
         }));
         ws["!cols"] = colWidths;
-
+    
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Empacotamentos");
-
+    
         XLSX.writeFile(wb, "Empacotamentos.xlsx");
-    }    
+    }
+     
 
     return (
         <div className="container-fluid mt-page">
@@ -215,7 +231,7 @@ function Appointments() {
                 <div className="container-custom mt-2">
                     <nav aria-label="breadcrumb">
                         <ol className="breadcrumb">
-                            <li className="breadcrumb-item"><Link to="/">Dashboard</Link></li>
+                            <li className="breadcrumb-item"><Link to="/dashboard">Dashboard</Link></li>
                             <li className="breadcrumb-item active" aria-current="page">Empacotamento</li>
                         </ol>
                     </nav>
