@@ -358,6 +358,14 @@ function AppointmentAdd() {
                         pesoB5: response.data.peso_b5
                     });
 
+                    setMediaPesos(calcularMedia({
+                        pesoB1: response.data.peso_b1,
+                        pesoB2: response.data.peso_b2,
+                        pesoB3: response.data.peso_b3,
+                        pesoB4: response.data.peso_b4,
+                        pesoB5: response.data.peso_b5,
+                    }));
+
                     setPesoB1(response.data.peso_b1);
                     setPesoB2(response.data.peso_b2);
                     setPesoB3(response.data.peso_b3);
@@ -643,19 +651,26 @@ function AppointmentAdd() {
     // Função para tratar a mudança dos valores dos pesos
     const handlePesoChange = (e) => {
         const { name, value } = e.target;
-        setPesos((prevPesos) => {
-          const novosPesos = {
-            ...prevPesos,
-            [name]: value,
-          };
+        
+        // A expressão regular permite apenas números com até 3 casas decimais
+        const regex = /^[0-9]*([.][0-9]{0,3})?$/;
     
-          // Após atualizar o peso, calcular a nova média e retornar o estado atualizado
-          const novaMedia = calcularMedia(novosPesos);
-          setMediaPesos(novaMedia);
+        // Verifica se o valor é válido de acordo com a regex
+        if (regex.test(value)) {
+            setPesos((prevPesos) => {
+                const novosPesos = {
+                    ...prevPesos,
+                    [name]: value,
+                };
     
-          return novosPesos;
-        });
+                const novaMedia = calcularMedia(novosPesos);
+                setMediaPesos(novaMedia);
+    
+                return novosPesos;
+            });
+        }
     };
+    
 
     return (
         <>
