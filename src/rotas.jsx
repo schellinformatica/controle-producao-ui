@@ -79,7 +79,8 @@ function Rotas() {
                     <Route path="/employee" element={<Employee />} />
                     <Route path="/employee/new" element={<EmployeeAdd />} />
 
-                    <Route path="/dashboard" element={<Dashboard />} />
+            
+                    <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} role="1" />} />
 
                     <Route path="/appointments" element={<Appointments />} />
                     <Route path="/appointments/add" element={<AppointmentAdd />} />
